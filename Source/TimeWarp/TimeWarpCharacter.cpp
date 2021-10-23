@@ -22,6 +22,8 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
+		
+
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
@@ -82,6 +84,16 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 
 	// Uncomment the following line to turn motion controllers on by default:
 	//bUsingMotionControllers = true;
+
+	// Create a mesh component that will be used when being viewed from a '2nd person' view
+	Mesh2P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh2P"));
+	Mesh2P->SetOwnerNoSee(true);
+	Mesh2P->SetupAttachment(FirstPersonCameraComponent);
+
+	// 2nd person gun mesh
+	FP_Gun2P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun2P"));
+	FP_Gun2P->SetOwnerNoSee(true);
+	FP_Gun2P->AttachToComponent(Mesh2P, FAttachmentTransformRules::KeepRelativeTransform, "gun_socket");
 }
 
 void ATimeWarpCharacter::BeginPlay()
