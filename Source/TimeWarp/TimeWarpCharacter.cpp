@@ -11,6 +11,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
+#include "Net/UnrealNetwork.h"
+#include "Engine/Engine.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -94,6 +96,10 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 	FP_Gun2P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun2P"));
 	FP_Gun2P->SetOwnerNoSee(true);
 	FP_Gun2P->AttachToComponent(Mesh2P, FAttachmentTransformRules::KeepRelativeTransform, "gun_socket");
+
+	// Initiallize the player's health
+	MaxHealth = 100.0f;
+	CurrentHealth = MaxHealth;
 }
 
 void ATimeWarpCharacter::BeginPlay()
@@ -155,29 +161,7 @@ void ATimeWarpCharacter::OnFire()
 	// try and fire a projectile
 	if (ProjectileClass != NULL)
 	{
-		UWorld* const World = GetWorld();
-		if (World != NULL)
-		{
-			if (bUsingMotionControllers)
-			{
-				const FRotator SpawnRotation = VR_MuzzleLocation->GetComponentRotation();
-				const FVector SpawnLocation = VR_MuzzleLocation->GetComponentLocation();
-				World->SpawnActor<ATimeWarpProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
-			}
-			else
-			{
-				const FRotator SpawnRotation = GetControlRotation();
-				// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
-				const FVector SpawnLocation = ((FP_MuzzleLocation != nullptr) ? FP_MuzzleLocation->GetComponentLocation() : GetActorLocation()) + SpawnRotation.RotateVector(GunOffset);
-
-				//Set Spawn Collision Handling Override
-				FActorSpawnParameters ActorSpawnParams;
-				ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-
-				// spawn the projectile at the muzzle
-				World->SpawnActor<ATimeWarpProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-			}
-		}
+		HandleFire();
 	}
 
 	// try and play the sound if specified
@@ -309,4 +293,96 @@ bool ATimeWarpCharacter::EnableTouchscreenMovement(class UInputComponent* Player
 	}
 	
 	return false;
+}
+
+void ATimeWarpCharacter::OnHealthUpdate()
+{
+	// Client-specific functionality
+	if (IsLocallyControlled())
+	{
+		FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+
+		if (CurrentHealth <= 0)
+		{
+			FString deathMessage = FString::Printf(TEXT("You have been killed."));
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
+		}
+	}
+
+	// Server-specific functionality
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		FString healthMessage = FString::Printf(TEXT("%s now has %f health remaining."), *GetFName().ToString(), CurrentHealth);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+	}
+	//Functions that occur on all machines. 
+   /*
+	   Any special functionality that should occur as a result of damage or death should be placed here.
+   */
+}
+
+void ATimeWarpCharacter::SetCurrentHealth(float healthValue)
+{
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		CurrentHealth = FMath::Clamp(healthValue, 0.f, MaxHealth);
+		OnHealthUpdate();
+	}
+}
+
+float ATimeWarpCharacter::TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float damageApplied = CurrentHealth - DamageTaken;
+	SetCurrentHealth(damageApplied);
+	return damageApplied;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Replicated Properties
+
+void ATimeWarpCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//Replicate current health.
+	DOREPLIFETIME(ATimeWarpCharacter, CurrentHealth);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Replication Handlers
+
+void ATimeWarpCharacter::OnRep_CurrentHealth()
+{
+	OnHealthUpdate();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Server RPCs
+void ATimeWarpCharacter::HandleFire_Implementation()
+{
+	UWorld* const World = GetWorld();
+	if (World != NULL)
+	{
+		if (bUsingMotionControllers)
+		{
+			const FRotator SpawnRotation = VR_MuzzleLocation->GetComponentRotation();
+			const FVector SpawnLocation = VR_MuzzleLocation->GetComponentLocation();
+			World->SpawnActor<ATimeWarpProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+		}
+		else
+		{
+			const FRotator SpawnRotation = GetControlRotation();
+			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
+			const FVector SpawnLocation = ((FP_MuzzleLocation != nullptr) ? FP_MuzzleLocation->GetComponentLocation() : GetActorLocation()) + SpawnRotation.RotateVector(GunOffset);
+
+			//Set Spawn Collision Handling Override
+			FActorSpawnParameters ActorSpawnParams;
+			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+			ActorSpawnParams.Instigator = this;
+
+			// spawn the projectile at the muzzle
+			World->SpawnActor<ATimeWarpProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+		}
+	}
 }
