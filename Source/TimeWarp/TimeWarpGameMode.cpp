@@ -5,6 +5,7 @@
 #include "TimeWarpCharacter.h"
 #include "TimeWarpGameState.h"
 #include "TimeWarpPlayerController.h"
+#include "TimeWarpPlayerState.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -24,21 +25,41 @@ ATimeWarpGameMode::ATimeWarpGameMode()
 
 	// use our custom player controllers
 	PlayerControllerClass = ATimeWarpPlayerController::StaticClass();
+
+	// use oru custom player state
+	PlayerStateClass = ATimeWarpPlayerState::StaticClass();
 }
 
 void ATimeWarpGameMode::PostLogin(APlayerController* NewPlayer)
 {
-	static_cast<ATimeWarpPlayerController*>(NewPlayer)->ClientPostLogin();
+	static_cast<ATimeWarpPlayerController*>(NewPlayer)->ClientPostLogin(NewPlayer);
 }
 
-void ATimeWarpGameMode::RespawnPlayerEvent_Implementation()
+void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* NewPlayer)
 {
 	// TODO: finish implementing
 	
-	// TODO: why is this not working? It was set in the level blueprint...
+	// Find out which player connected
+	int serverPlayerId = GameState->PlayerArray[0]->GetPlayerId();
+	int controllerPlayerId = NewPlayer->PlayerState->GetPlayerId();
+
+	if (serverPlayerId == controllerPlayerId)
+	{
+		// server
+		FString debugMessage = FString::Printf(TEXT("Debug: I am the server%d"), controllerPlayerId);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, debugMessage);
+	}
+	else
+	{
+		// client
+		FString debugMessage = FString::Printf(TEXT("Debug: I am the client%d"), controllerPlayerId);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, debugMessage);
+	}
+
+	// See if we have the player start actors on the map
 	if (IsValid(playerStart1) && IsValid(playerStart2))
 	{
-		FString debugMessage = FString::Printf(TEXT("Debug: Found player start actors"));
+		FString debugMessage = FString::Printf(TEXT("Debug: Player Starts properly connected!"));
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, debugMessage);
 	}
 
