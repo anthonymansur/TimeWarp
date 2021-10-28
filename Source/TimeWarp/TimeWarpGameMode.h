@@ -22,7 +22,7 @@ public:
 public:
 	/** Server function for spawning projectiles. */
 	UFUNCTION(Server, Reliable)
-	void RespawnPlayerEvent();
+	void RespawnPlayerEvent(APlayerController* NewPlayer);
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 

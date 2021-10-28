@@ -16,5 +16,5 @@ class TIMEWARP_API ATimeWarpPlayerController : public APlayerController
 
 public:
 	// After login, set up the UI and spawn ther palyer
-	void ClientPostLogin();
+	void ClientPostLogin(APlayerController* NewPlayer);
 };
