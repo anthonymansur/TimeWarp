@@ -13,6 +13,19 @@ class ATimeWarpGameMode : public AGameModeBase
 
 public:
 	ATimeWarpGameMode();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	AActor* playerStart1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	AActor* playerStart2;
+
+public:
+	/** Server function for spawning projectiles. */
+	UFUNCTION(Server, Reliable)
+	void RespawnPlayerEvent();
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
 };
 
 
