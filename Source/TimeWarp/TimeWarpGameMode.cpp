@@ -16,6 +16,7 @@ ATimeWarpGameMode::ATimeWarpGameMode()
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/FirstPersonCPP/Blueprints/FirstPersonCharacter"));
 	//DefaultPawnClass = PlayerPawnClassFinder.Class;
+	playerClass = PlayerPawnClassFinder.Class;
 
 	// use our custom HUD class
 	HUDClass = ATimeWarpHUD::StaticClass();
@@ -26,8 +27,19 @@ ATimeWarpGameMode::ATimeWarpGameMode()
 	// use our custom player controllers
 	PlayerControllerClass = ATimeWarpPlayerController::StaticClass();
 
-	// use oru custom player state
+	// use our custom player state
 	PlayerStateClass = ATimeWarpPlayerState::StaticClass();
+
+	// Locate the player start locations
+	TArray<AActor*> actors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "PlayerStart", actors);
+
+	if (actors.Num() == 2)
+	{
+		playerStart1 = actors[0];
+		playerStart2 = actors[1];
+
+	}
 }
 
 void ATimeWarpGameMode::PostLogin(APlayerController* NewPlayer)
@@ -36,9 +48,9 @@ void ATimeWarpGameMode::PostLogin(APlayerController* NewPlayer)
 }
 
 void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* NewPlayer)
-{
-	// TODO: finish implementing
-	
+{	
+	// TODO: figure out rotation respawn bug
+
 	// Find out which player connected
 	int serverPlayerId = GameState->PlayerArray[0]->GetPlayerId();
 	int controllerPlayerId = NewPlayer->PlayerState->GetPlayerId();
@@ -46,23 +58,45 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 	if (serverPlayerId == controllerPlayerId)
 	{
 		// server
-		FString debugMessage = FString::Printf(TEXT("Debug: I am the server%d"), controllerPlayerId);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, debugMessage);
+		if (IsValid(playerStart1))
+		{
+			const FRotator SpawnRotation = playerStart1->GetActorRotation();
+			const FVector SpawnLocation = playerStart1->GetActorLocation();
+
+			FActorSpawnParameters ActorSpawnParams;
+
+			// spawn character
+			APawn* player1 = GetWorld()->SpawnActor<APawn>(
+				playerClass,
+				SpawnLocation, 
+				SpawnRotation, 
+				ActorSpawnParams);
+
+			// Posses character
+			NewPlayer->Possess(player1);
+			NewPlayer->ClientSetHUD(HUDClass);
+		}
 	}
 	else
 	{
 		// client
-		FString debugMessage = FString::Printf(TEXT("Debug: I am the client%d"), controllerPlayerId);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, debugMessage);
-	}
+		if (IsValid(playerStart2))
+		{
+			const FRotator SpawnRotation = playerStart2->GetActorRotation();
+			const FVector SpawnLocation = playerStart2->GetActorLocation();
 
-	// See if we have the player start actors on the map
-	if (IsValid(playerStart1) && IsValid(playerStart2))
-	{
-		FString debugMessage = FString::Printf(TEXT("Debug: Player Starts properly connected!"));
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, debugMessage);
-	}
+			FActorSpawnParameters ActorSpawnParams;
 
-	FString debugMessage = FString::Printf(TEXT("TODO: need to spawn players at start locations"));
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, debugMessage);
+			// spawn character
+			APawn* player2 = GetWorld()->SpawnActor<APawn>(
+				playerClass,
+				SpawnLocation,
+				SpawnRotation,
+				ActorSpawnParams);
+
+			// Posses character
+			NewPlayer->Possess(player2);
+			NewPlayer->ClientSetHUD(HUDClass);
+		}
+	}
 }

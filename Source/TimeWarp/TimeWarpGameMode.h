@@ -19,6 +19,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	AActor* playerStart2;
 
+	TSubclassOf<APawn> playerClass;
+
 public:
 	/** Server function for spawning projectiles. */
 	UFUNCTION(Server, Reliable)
