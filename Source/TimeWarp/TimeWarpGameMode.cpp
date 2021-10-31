@@ -74,6 +74,7 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 
 			// Posses character
 			NewPlayer->Possess(player1);
+			static_cast<ATimeWarpPlayerController*>(NewPlayer)->ForceControlRotation(SpawnRotation);
 			NewPlayer->ClientSetHUD(HUDClass);
 		}
 	}
@@ -96,6 +97,7 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 
 			// Posses character
 			NewPlayer->Possess(player2);
+			static_cast<ATimeWarpPlayerController*>(NewPlayer)->ForceControlRotation(SpawnRotation);
 			NewPlayer->ClientSetHUD(HUDClass);
 		}
 	}
