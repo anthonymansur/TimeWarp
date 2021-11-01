@@ -371,6 +371,11 @@ float ATimeWarpCharacter::TakeDamage(float DamageTaken, struct FDamageEvent cons
 	return damageApplied;
 }
 
+void ATimeWarpCharacter::AllowRotation()
+{
+	bRotationEnabled = true;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Replicated Properties
 
@@ -380,6 +385,9 @@ void ATimeWarpCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& 
 
 	//Replicate current health.
 	DOREPLIFETIME(ATimeWarpCharacter, CurrentHealth);
+	DOREPLIFETIME(ATimeWarpCharacter, bRotationEnabled);
+	DOREPLIFETIME(ATimeWarpCharacter, bTranslationEnabled);
+	DOREPLIFETIME(ATimeWarpCharacter, bCanShoot);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -418,18 +426,5 @@ void ATimeWarpCharacter::HandleFire_Implementation()
 			World->SpawnActor<ATimeWarpProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 		}
 	}
-}
-
-void ATimeWarpCharacter::Tick(float t)
-{
-	Super::Tick(t);
-	ATimeWarpGameState* gameState = static_cast<ATimeWarpGameState*>(GetWorld()->GetGameState());
-	if (gameState->HasMatchStarted())
-	{
-		bRotationEnabled = true;
-	}
-
-	// F
-	
 }
 
