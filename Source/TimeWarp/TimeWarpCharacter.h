@@ -139,8 +139,6 @@ protected:
 	/** Response to health being updated. called on the server immediately after modification, and on clients in response to a RepNotify */
 	void OnHealthUpdate();
 
-	void Tick(float) override;
-
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
@@ -170,8 +168,11 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void HandleFire();
 
+	UPROPERTY(Replicated)
 	bool bTranslationEnabled;
+	UPROPERTY(Replicated)
 	bool bRotationEnabled;
+	UPROPERTY(Replicated)
 	bool bCanShoot;
 
 public:
@@ -195,5 +196,7 @@ public:
 	/** Event for taking damage. Overridden from APawn.*/
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	void AllowRotation();
 };
 
