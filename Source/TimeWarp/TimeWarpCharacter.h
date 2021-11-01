@@ -105,6 +105,12 @@ protected:
 	/** Handles stafing movement, left and right */
 	void MoveRight(float Val);
 
+	/** Handles turning, left and right */
+	void Turn(float rate);
+
+	/** Handles looking up, up and down */
+	void LookUp(float rate);
+
 	/**
 	 * Called via input to turn at a given rate.
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
@@ -132,6 +138,8 @@ protected:
 
 	/** Response to health being updated. called on the server immediately after modification, and on clients in response to a RepNotify */
 	void OnHealthUpdate();
+
+	void Tick(float) override;
 
 protected:
 	// APawn interface
@@ -161,6 +169,10 @@ protected:
 	/** Server function for spawning projectiles. */
 	UFUNCTION(Server, Reliable)
 	void HandleFire();
+
+	bool bTranslationEnabled;
+	bool bRotationEnabled;
+	bool bCanShoot;
 
 public:
 	/** Returns Mesh1P subobject **/
