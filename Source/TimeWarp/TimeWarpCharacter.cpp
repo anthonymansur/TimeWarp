@@ -13,6 +13,7 @@
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
+#include "TimeWarpGameState.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -100,6 +101,13 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 	// Initiallize the player's health
 	MaxHealth = 100.0f;
 	CurrentHealth = MaxHealth;
+
+	// Disable movement by default
+	bRotationEnabled = false;
+	bTranslationEnabled = false;
+
+	// Disable firing by default
+	bCanShoot = false;
 }
 
 void ATimeWarpCharacter::BeginPlay()
@@ -150,14 +158,17 @@ void ATimeWarpCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("Turn", this, &ATimeWarpCharacter::Turn);
 	PlayerInputComponent->BindAxis("TurnRate", this, &ATimeWarpCharacter::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("LookUp", this, &ATimeWarpCharacter::LookUp);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ATimeWarpCharacter::LookUpAtRate);
 }
 
 void ATimeWarpCharacter::OnFire()
 {
+	if (!bCanShoot)
+		return;
+
 	// try and fire a projectile
 	if (ProjectileClass != NULL)
 	{
@@ -252,7 +263,7 @@ void ATimeWarpCharacter::EndTouch(const ETouchIndex::Type FingerIndex, const FVe
 
 void ATimeWarpCharacter::MoveForward(float Value)
 {
-	if (Value != 0.0f)
+	if (bTranslationEnabled && Value != 0.0f)
 	{
 		// add movement in that direction
 		AddMovementInput(GetActorForwardVector(), Value);
@@ -261,23 +272,45 @@ void ATimeWarpCharacter::MoveForward(float Value)
 
 void ATimeWarpCharacter::MoveRight(float Value)
 {
-	if (Value != 0.0f)
+	if (bTranslationEnabled && Value != 0.0f)
 	{
 		// add movement in that direction
 		AddMovementInput(GetActorRightVector(), Value);
 	}
 }
 
+void ATimeWarpCharacter::Turn(float rate)
+{
+	if (bRotationEnabled)
+	{
+		APawn::AddControllerYawInput(rate);
+	}
+}
+
+void ATimeWarpCharacter::LookUp(float rate)
+{
+	if (bRotationEnabled)
+	{
+		APawn::AddControllerPitchInput(rate);
+	}
+}
+
 void ATimeWarpCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	if (bRotationEnabled)
+	{
+		AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	}
 }
 
 void ATimeWarpCharacter::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	if (bRotationEnabled)
+	{
+		AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	}
 }
 
 bool ATimeWarpCharacter::EnableTouchscreenMovement(class UInputComponent* PlayerInputComponent)
@@ -338,6 +371,21 @@ float ATimeWarpCharacter::TakeDamage(float DamageTaken, struct FDamageEvent cons
 	return damageApplied;
 }
 
+void ATimeWarpCharacter::AllowRotation()
+{
+	bRotationEnabled = true;
+}
+
+void ATimeWarpCharacter::AllowTranslation()
+{
+	bTranslationEnabled = true;
+}
+
+void ATimeWarpCharacter::AllowShooting()
+{
+	bCanShoot = true;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Replicated Properties
 
@@ -347,6 +395,9 @@ void ATimeWarpCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& 
 
 	//Replicate current health.
 	DOREPLIFETIME(ATimeWarpCharacter, CurrentHealth);
+	DOREPLIFETIME(ATimeWarpCharacter, bRotationEnabled);
+	DOREPLIFETIME(ATimeWarpCharacter, bTranslationEnabled);
+	DOREPLIFETIME(ATimeWarpCharacter, bCanShoot);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -358,7 +409,7 @@ void ATimeWarpCharacter::OnRep_CurrentHealth()
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Server RPCs
+// RPCs
 void ATimeWarpCharacter::HandleFire_Implementation()
 {
 	UWorld* const World = GetWorld();
@@ -386,3 +437,4 @@ void ATimeWarpCharacter::HandleFire_Implementation()
 		}
 	}
 }
+

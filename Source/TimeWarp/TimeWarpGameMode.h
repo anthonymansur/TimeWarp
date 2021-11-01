@@ -3,23 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
+#include "TimerManager.h"
 #include "TimeWarpGameMode.generated.h"
 
 UCLASS(minimalapi)
-class ATimeWarpGameMode : public AGameModeBase
+class ATimeWarpGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
 public:
 	ATimeWarpGameMode();
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	AActor* playerStart1;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	AActor* playerStart2;
-
-	TSubclassOf<APawn> playerClass;
 
 public:
 	/** Server function for spawning projectiles. */
@@ -28,6 +22,23 @@ public:
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
+	virtual void HandleMatchHasStarted() override;
+
+protected:
+	AActor* playerStart1;
+	AActor* playerStart2;
+	APlayerController* player1Controller;
+	APlayerController* player2Controller;
+	TSubclassOf<APawn> playerClass;
+
+	FTimerHandle timeHandle;
+protected:
+	void StartPathSelection();
+	void EndPathSelection();
+	void StartLightingStage();
+	void EndLightingStage();
+	void StartEliminationStage();
+	void EndElimination();
 };
 
 
