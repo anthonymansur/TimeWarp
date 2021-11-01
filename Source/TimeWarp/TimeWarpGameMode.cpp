@@ -58,6 +58,8 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 	if (serverPlayerId == controllerPlayerId)
 	{
 		// server
+		player1Controller = NewPlayer;
+
 		if (IsValid(playerStart1))
 		{
 			const FRotator SpawnRotation = playerStart1->GetActorRotation();
@@ -81,6 +83,8 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 	else
 	{
 		// client
+		player2Controller = NewPlayer;
+
 		if (IsValid(playerStart2))
 		{
 			const FRotator SpawnRotation = playerStart2->GetActorRotation();
@@ -100,5 +104,14 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 			static_cast<ATimeWarpPlayerController*>(NewPlayer)->ForceControlRotation(SpawnRotation);
 			NewPlayer->ClientSetHUD(HUDClass);
 		}
+
+		// Start Match
+		StartMatch();
 	}
+}
+
+
+void ATimeWarpGameMode::HandleMatchHasStarted()
+{
+	
 }
