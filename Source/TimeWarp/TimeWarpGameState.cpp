@@ -2,4 +2,6 @@
 
 
 #include "TimeWarpGameState.h"
-
+#include "TimeWarpGameMode.h"
+#include "TimeWarpCharacter.h"
+#include "TimeWarpPlayerState.h"

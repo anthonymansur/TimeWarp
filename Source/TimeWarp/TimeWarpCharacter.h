@@ -105,6 +105,12 @@ protected:
 	/** Handles stafing movement, left and right */
 	void MoveRight(float Val);
 
+	/** Handles turning, left and right */
+	void Turn(float rate);
+
+	/** Handles looking up, up and down */
+	void LookUp(float rate);
+
 	/**
 	 * Called via input to turn at a given rate.
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
@@ -162,6 +168,13 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void HandleFire();
 
+	UPROPERTY(Replicated)
+	bool bTranslationEnabled;
+	UPROPERTY(Replicated)
+	bool bRotationEnabled;
+	UPROPERTY(Replicated)
+	bool bCanShoot;
+
 public:
 	/** Returns Mesh1P subobject **/
 	FORCEINLINE class USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
@@ -183,5 +196,9 @@ public:
 	/** Event for taking damage. Overridden from APawn.*/
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	void AllowRotation();
+	void AllowTranslation();
+	void AllowShooting();
 };
 
