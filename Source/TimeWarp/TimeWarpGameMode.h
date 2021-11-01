@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "TimerManager.h"
 #include "TimeWarpGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -28,8 +29,16 @@ protected:
 	AActor* playerStart2;
 	APlayerController* player1Controller;
 	APlayerController* player2Controller;
-
 	TSubclassOf<APawn> playerClass;
+
+	FTimerHandle timeHandle;
+protected:
+	void StartPathSelection();
+	void EndPathSelection();
+	void StartLightingStage();
+	void EndLightingStage();
+	void StartEliminationStage();
+	void EndElimination();
 };
 
 

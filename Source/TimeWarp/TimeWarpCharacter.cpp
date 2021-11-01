@@ -376,6 +376,16 @@ void ATimeWarpCharacter::AllowRotation()
 	bRotationEnabled = true;
 }
 
+void ATimeWarpCharacter::AllowTranslation()
+{
+	bTranslationEnabled = true;
+}
+
+void ATimeWarpCharacter::AllowShooting()
+{
+	bCanShoot = true;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Replicated Properties
 
