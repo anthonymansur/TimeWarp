@@ -110,8 +110,61 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 	}
 }
 
-
 void ATimeWarpGameMode::HandleMatchHasStarted()
 {
-	
+	for (APlayerState* Player : GameState->PlayerArray)
+	{
+		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
+		pawn->AllowRotation();
+	}
+
+	GetWorldTimerManager().SetTimer(timeHandle, this, &ATimeWarpGameMode::StartPathSelection, 5.f, false, -1.f);
+}
+
+void ATimeWarpGameMode::StartPathSelection()
+{
+	for (APlayerState* Player : GameState->PlayerArray)
+	{
+		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
+		pawn->AllowTranslation();
+	}
+
+	// TODO: Store players' translation into buffer
+
+	GetWorldTimerManager().SetTimer(timeHandle, this, &ATimeWarpGameMode::EndPathSelection, 15.f, false, -1.f);
+}
+
+void ATimeWarpGameMode::EndPathSelection()
+{
+	// TODO: implement
+	// 1. Unpossess pawns and delete from map
+	// 2. Do any preinitialization for lighting
+	// 3. Start lighting phase
+
+	// Skipping the lighting phase for development purposes
+
+	StartEliminationStage();
+}
+
+void ATimeWarpGameMode::StartLightingStage()
+{
+	// TODO: implement
+}
+void ATimeWarpGameMode::EndLightingStage()
+{
+	// TODO: implement
+}
+void ATimeWarpGameMode::StartEliminationStage()
+{
+	// TODO: implement
+
+	for (APlayerState* Player : GameState->PlayerArray)
+	{
+		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
+		pawn->AllowShooting();
+	}
+}
+void ATimeWarpGameMode::EndElimination()
+{
+	// TODO: implement
 }

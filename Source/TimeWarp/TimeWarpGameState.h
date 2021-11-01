@@ -30,7 +30,6 @@ class TIMEWARP_API ATimeWarpGameState : public AGameState
 	GENERATED_BODY()
 
 protected:
-	virtual void HandleMatchHasStarted() override;
 
 public:
 };

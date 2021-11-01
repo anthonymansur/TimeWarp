@@ -198,5 +198,7 @@ public:
 	float TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	void AllowRotation();
+	void AllowTranslation();
+	void AllowShooting();
 };
 
