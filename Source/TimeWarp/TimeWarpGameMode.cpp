@@ -118,7 +118,7 @@ void ATimeWarpGameMode::HandleMatchHasStarted()
 		pawn->AllowRotation();
 	}
 
-	GetWorldTimerManager().SetTimer(timeHandle, this, &ATimeWarpGameMode::StartPathSelection, 5.f, false, -1.f);
+	GetWorldTimerManager().SetTimer(timeHandle, this, &ATimeWarpGameMode::StartPathSelection, 2.f, false, -1.f);
 }
 
 void ATimeWarpGameMode::StartPathSelection()
@@ -131,7 +131,7 @@ void ATimeWarpGameMode::StartPathSelection()
 
 	// TODO: Store players' translation into buffer
 
-	GetWorldTimerManager().SetTimer(timeHandle, this, &ATimeWarpGameMode::EndPathSelection, 15.f, false, -1.f);
+	GetWorldTimerManager().SetTimer(timeHandle, this, &ATimeWarpGameMode::EndPathSelection, 5.f, false, -1.f);
 }
 
 void ATimeWarpGameMode::EndPathSelection()
@@ -167,4 +167,14 @@ void ATimeWarpGameMode::StartEliminationStage()
 void ATimeWarpGameMode::EndElimination()
 {
 	// TODO: implement
+	for (APlayerState* Player : GameState->PlayerArray)
+	{
+		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
+		if (pawn->IsDead())
+		{
+			pawn->DisableRotation();
+		}
+		pawn->DisableTranslation();
+		pawn->DisableShooting();
+	}
 }

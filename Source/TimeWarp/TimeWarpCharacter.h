@@ -197,8 +197,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	bool IsDead();
+
 	void AllowRotation();
 	void AllowTranslation();
 	void AllowShooting();
+
+	void DisableRotation();
+	void DisableTranslation();
+	void DisableShooting();
 };
 

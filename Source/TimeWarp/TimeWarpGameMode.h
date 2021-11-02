@@ -23,6 +23,7 @@ public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	virtual void HandleMatchHasStarted() override;
+	void EndElimination();
 
 protected:
 	AActor* playerStart1;
@@ -32,13 +33,13 @@ protected:
 	TSubclassOf<APawn> playerClass;
 
 	FTimerHandle timeHandle;
+
 protected:
 	void StartPathSelection();
 	void EndPathSelection();
 	void StartLightingStage();
 	void EndLightingStage();
 	void StartEliminationStage();
-	void EndElimination();
 };
 
 

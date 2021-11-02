@@ -14,6 +14,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
 #include "TimeWarpGameState.h"
+#include "TimeWarpGameMode.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -335,12 +336,6 @@ void ATimeWarpCharacter::OnHealthUpdate()
 	{
 		FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
-
-		if (CurrentHealth <= 0)
-		{
-			FString deathMessage = FString::Printf(TEXT("You have been killed."));
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
-		}
 	}
 
 	// Server-specific functionality
@@ -348,6 +343,19 @@ void ATimeWarpCharacter::OnHealthUpdate()
 	{
 		FString healthMessage = FString::Printf(TEXT("%s now has %f health remaining."), *GetFName().ToString(), CurrentHealth);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+	}
+
+	if (abs(CurrentHealth) <= 0.001f)
+	{
+		FString deathMessage = FString::Printf(TEXT("You have been killed."));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
+
+		if (GetWorld()->IsServer())
+		{
+			// End match 
+			ATimeWarpGameMode* gameMode = static_cast<ATimeWarpGameMode*>(GetWorld()->GetAuthGameMode());
+			gameMode->EndElimination();
+		}
 	}
 	//Functions that occur on all machines. 
    /*
@@ -371,6 +379,11 @@ float ATimeWarpCharacter::TakeDamage(float DamageTaken, struct FDamageEvent cons
 	return damageApplied;
 }
 
+bool ATimeWarpCharacter::IsDead()
+{
+	return abs(CurrentHealth) < 0.001f;
+}
+
 void ATimeWarpCharacter::AllowRotation()
 {
 	bRotationEnabled = true;
@@ -384,6 +397,19 @@ void ATimeWarpCharacter::AllowTranslation()
 void ATimeWarpCharacter::AllowShooting()
 {
 	bCanShoot = true;
+}
+
+void ATimeWarpCharacter::DisableRotation()
+{
+	bRotationEnabled = false;
+}
+void ATimeWarpCharacter::DisableTranslation()
+{
+	bTranslationEnabled = false;
+}
+void ATimeWarpCharacter::DisableShooting()
+{
+	bCanShoot = false;
 }
 
 //////////////////////////////////////////////////////////////////////////
