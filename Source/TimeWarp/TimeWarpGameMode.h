@@ -32,7 +32,16 @@ protected:
 	APlayerController* player2Controller;
 	TSubclassOf<APawn> playerClass;
 
-	FTimerHandle timeHandle;
+	FTimerHandle handle_gameStarting;
+	FTimerHandle handle_pathSelection;
+	FTimerHandle handle_pathSelectionEnd;
+	FTimerHandle handle_lighting;
+	FTimerHandle handle_elimination;
+	FTimerHandle handle_eliminationEnd;
+
+	TArray<FVector> p1PositionOverTime;
+	TArray<FVector> p2PositionOverTime;
+	int positionIndex;
 
 protected:
 	void StartPathSelection();
@@ -40,6 +49,9 @@ protected:
 	void StartLightingStage();
 	void EndLightingStage();
 	void StartEliminationStage();
+
+	void StorePlayerPositions();
+	void TranslatePlayerPositions();
 };
 
 
