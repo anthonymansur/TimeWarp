@@ -122,7 +122,7 @@ void ATimeWarpGameMode::HandleMatchHasStarted()
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Match will begin shortly.");
 
-	GetWorldTimerManager().SetTimer(handle_gameStarting, this, &ATimeWarpGameMode::StartPathSelection, 2.f, false, -1.f);
+	GetWorldTimerManager().SetTimer(handle_gameStarting, this, &ATimeWarpGameMode::StartPathSelection, 5.f, false, -1.f);
 }
 
 void ATimeWarpGameMode::StartPathSelection()
@@ -139,7 +139,7 @@ void ATimeWarpGameMode::StartPathSelection()
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Path Selection started!");
 
 	GetWorldTimerManager().SetTimer(handle_pathSelection, this, &ATimeWarpGameMode::StorePlayerPositions, 0.01f, true, 0.f);
-	GetWorldTimerManager().SetTimer(handle_pathSelectionEnd, this, &ATimeWarpGameMode::EndPathSelection, 10.f, false, -1.f);
+	GetWorldTimerManager().SetTimer(handle_pathSelectionEnd, this, &ATimeWarpGameMode::EndPathSelection, 20.f, false, -1.f);
 }
 
 void ATimeWarpGameMode::EndPathSelection()
@@ -178,7 +178,7 @@ void ATimeWarpGameMode::StartEliminationStage()
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Elimination started!");
 
 	GetWorldTimerManager().SetTimer(handle_elimination, this, &ATimeWarpGameMode::TranslatePlayerPositions, 0.01f, true, 0.f);
-	GetWorldTimerManager().SetTimer(handle_eliminationEnd, this, &ATimeWarpGameMode::EndElimination, 10.f, false, -1.f);
+	GetWorldTimerManager().SetTimer(handle_eliminationEnd, this, &ATimeWarpGameMode::EndElimination, 20.f, false, -1.f);
 }
 void ATimeWarpGameMode::EndElimination()
 {
