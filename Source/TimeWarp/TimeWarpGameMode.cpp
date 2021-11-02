@@ -6,6 +6,7 @@
 #include "TimeWarpGameState.h"
 #include "TimeWarpPlayerController.h"
 #include "TimeWarpPlayerState.h"
+#include "Engine/LevelScriptActor.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -40,6 +41,7 @@ ATimeWarpGameMode::ATimeWarpGameMode()
 		playerStart2 = actors[1];
 
 	}
+	positionIndex = 0;
 }
 
 void ATimeWarpGameMode::PostLogin(APlayerController* NewPlayer)
@@ -118,20 +120,26 @@ void ATimeWarpGameMode::HandleMatchHasStarted()
 		pawn->AllowRotation();
 	}
 
-	GetWorldTimerManager().SetTimer(timeHandle, this, &ATimeWarpGameMode::StartPathSelection, 2.f, false, -1.f);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Match will begin shortly.");
+
+	GetWorldTimerManager().SetTimer(handle_gameStarting, this, &ATimeWarpGameMode::StartPathSelection, 2.f, false, -1.f);
 }
 
 void ATimeWarpGameMode::StartPathSelection()
 {
+
+	// TODO: Store players' translation into buffer
+	//bool eventFound = GetLevel()->GetLevelScriptActor()->RemoteEvent("PathSelection");
 	for (APlayerState* Player : GameState->PlayerArray)
 	{
 		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
 		pawn->AllowTranslation();
 	}
 
-	// TODO: Store players' translation into buffer
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Path Selection started!");
 
-	GetWorldTimerManager().SetTimer(timeHandle, this, &ATimeWarpGameMode::EndPathSelection, 5.f, false, -1.f);
+	GetWorldTimerManager().SetTimer(handle_pathSelection, this, &ATimeWarpGameMode::StorePlayerPositions, 0.01f, true, 0.f);
+	GetWorldTimerManager().SetTimer(handle_pathSelectionEnd, this, &ATimeWarpGameMode::EndPathSelection, 10.f, false, -1.f);
 }
 
 void ATimeWarpGameMode::EndPathSelection()
@@ -142,6 +150,9 @@ void ATimeWarpGameMode::EndPathSelection()
 	// 3. Start lighting phase
 
 	// Skipping the lighting phase for development purposes
+
+	// Invalidate path selection timers
+	GetWorldTimerManager().ClearTimer(handle_pathSelection);
 
 	StartEliminationStage();
 }
@@ -156,25 +167,70 @@ void ATimeWarpGameMode::EndLightingStage()
 }
 void ATimeWarpGameMode::StartEliminationStage()
 {
-	// TODO: implement
 
 	for (APlayerState* Player : GameState->PlayerArray)
 	{
 		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
+		pawn->DisableTranslation();
 		pawn->AllowShooting();
 	}
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Elimination started!");
+
+	GetWorldTimerManager().SetTimer(handle_elimination, this, &ATimeWarpGameMode::TranslatePlayerPositions, 0.01f, true, 0.f);
+	GetWorldTimerManager().SetTimer(handle_eliminationEnd, this, &ATimeWarpGameMode::EndElimination, 10.f, false, -1.f);
 }
 void ATimeWarpGameMode::EndElimination()
 {
-	// TODO: implement
-	for (APlayerState* Player : GameState->PlayerArray)
+	// invalidate elimination timer
+	GetWorldTimerManager().ClearTimer(handle_elimination);
+	GetWorldTimerManager().ClearTimer(handle_eliminationEnd); // For when this function is called prematurely
+
+	bool player1Dead = false; 
+	bool player2Dead = false;
+	for (int i = 0; i < 2; i++)
 	{
-		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
+		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(UGameplayStatics::GetPlayerPawn(GetWorld(), i));
 		if (pawn->IsDead())
 		{
 			pawn->DisableRotation();
+			if (i == 0)
+			{
+				player1Dead = true;
+			}
+			else
+			{
+				player2Dead = true;
+			}
 		}
 		pawn->DisableTranslation();
 		pawn->DisableShooting();
 	}
+
+	FString debug;
+	if (player2Dead)
+		debug = FString::Printf(TEXT("Player 1 won!"));
+	else if (player1Dead)
+		debug = FString::Printf(TEXT("Player 2 won!"));
+	else
+		debug = FString::Printf(TEXT("Draw!"));
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Match ended");
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, debug);
+}
+
+void ATimeWarpGameMode::StorePlayerPositions()
+{
+	FVector p1Pos = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation();
+	FVector p2Pos = UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->GetActorLocation();
+
+	p1PositionOverTime.Emplace(p1Pos);
+	p2PositionOverTime.Emplace(p2Pos);
+}
+void ATimeWarpGameMode::TranslatePlayerPositions()
+{
+	UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->SetActorLocation(p1PositionOverTime[positionIndex]);
+	UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->SetActorLocation(p2PositionOverTime[positionIndex]);
+
+	positionIndex++;
 }
