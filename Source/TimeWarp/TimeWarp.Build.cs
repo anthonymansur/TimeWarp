@@ -9,5 +9,7 @@ public class TimeWarp : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay" });
+	
+		DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
 	}
 }
