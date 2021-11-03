@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "TimerManager.h"
+
 #include "TimeWarpGameMode.generated.h"
 
 UCLASS(minimalapi)
@@ -42,6 +43,7 @@ protected:
 	TArray<FVector> p1PositionOverTime;
 	TArray<FVector> p2PositionOverTime;
 	int positionIndex;
+	int positionArraySize;
 
 protected:
 	void StartPathSelection();
