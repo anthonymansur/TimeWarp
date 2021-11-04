@@ -11,6 +11,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
+#include <algorithm>
+
 #define RECORD_FREQUENCY 0.002 // in seconds
 #define PREGAME_LENGTH 5.0
 #define GAME_LENGTH 15.0 
