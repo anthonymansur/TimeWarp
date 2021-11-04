@@ -13,7 +13,7 @@
 
 #define RECORD_FREQUENCY 0.002 // in seconds
 #define PREGAME_LENGTH 5.0
-#define GAME_LENGTH 15.0 
+#define GAME_LENGTH 30.0 
 
 ATimeWarpGameMode::ATimeWarpGameMode()
 	: Super()
