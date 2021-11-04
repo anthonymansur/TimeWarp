@@ -76,3 +76,5 @@ DerivedDataCache/*
 # Do not include Starter content to git
 Content/StarterContent/* 
 Content/AnimStarterContent/*
+
+Package/*

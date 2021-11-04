@@ -11,6 +11,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
+#define RECORD_FREQUENCY 0.002 // in seconds
+#define PREGAME_LENGTH 5.0
+#define GAME_LENGTH 15.0 
+
 ATimeWarpGameMode::ATimeWarpGameMode()
 	: Super()
 {
@@ -80,6 +84,8 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 			NewPlayer->Possess(player1);
 			static_cast<ATimeWarpPlayerController*>(NewPlayer)->ForceControlRotation(SpawnRotation);
 			NewPlayer->ClientSetHUD(HUDClass);
+
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Waiting for other player to join.");
 		}
 	}
 	else
@@ -105,10 +111,10 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 			NewPlayer->Possess(player2);
 			static_cast<ATimeWarpPlayerController*>(NewPlayer)->ForceControlRotation(SpawnRotation);
 			NewPlayer->ClientSetHUD(HUDClass);
-		}
 
-		// Start Match
-		StartMatch();
+			// Start Match
+			StartMatch();
+		}
 	}
 }
 
@@ -122,7 +128,7 @@ void ATimeWarpGameMode::HandleMatchHasStarted()
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Match will begin shortly.");
 
-	GetWorldTimerManager().SetTimer(handle_gameStarting, this, &ATimeWarpGameMode::StartPathSelection, 5.f, false, -1.f);
+	GetWorldTimerManager().SetTimer(handle_gameStarting, this, &ATimeWarpGameMode::StartPathSelection, PREGAME_LENGTH, false, -1.f);
 }
 
 void ATimeWarpGameMode::StartPathSelection()
@@ -138,8 +144,8 @@ void ATimeWarpGameMode::StartPathSelection()
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Path Selection started!");
 
-	GetWorldTimerManager().SetTimer(handle_pathSelection, this, &ATimeWarpGameMode::StorePlayerPositions, 0.01f, true, 0.f);
-	GetWorldTimerManager().SetTimer(handle_pathSelectionEnd, this, &ATimeWarpGameMode::EndPathSelection, 20.f, false, -1.f);
+	GetWorldTimerManager().SetTimer(handle_pathSelection, this, &ATimeWarpGameMode::StorePlayerPositions, RECORD_FREQUENCY, true, 0.f);
+	GetWorldTimerManager().SetTimer(handle_pathSelectionEnd, this, &ATimeWarpGameMode::EndPathSelection, GAME_LENGTH, false, -1.f);
 }
 
 void ATimeWarpGameMode::EndPathSelection()
@@ -153,6 +159,8 @@ void ATimeWarpGameMode::EndPathSelection()
 
 	// Invalidate path selection timers
 	GetWorldTimerManager().ClearTimer(handle_pathSelection);
+
+	positionArraySize = std::min(p1PositionOverTime.Num(), p2PositionOverTime.Num());
 
 	StartEliminationStage();
 }
@@ -177,8 +185,8 @@ void ATimeWarpGameMode::StartEliminationStage()
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Elimination started!");
 
-	GetWorldTimerManager().SetTimer(handle_elimination, this, &ATimeWarpGameMode::TranslatePlayerPositions, 0.01f, true, 0.f);
-	GetWorldTimerManager().SetTimer(handle_eliminationEnd, this, &ATimeWarpGameMode::EndElimination, 20.f, false, -1.f);
+	GetWorldTimerManager().SetTimer(handle_elimination, this, &ATimeWarpGameMode::TranslatePlayerPositions, RECORD_FREQUENCY, true, 0.f);
+	GetWorldTimerManager().SetTimer(handle_eliminationEnd, this, &ATimeWarpGameMode::EndElimination, GAME_LENGTH, false, -1.f);
 }
 void ATimeWarpGameMode::EndElimination()
 {
@@ -229,8 +237,11 @@ void ATimeWarpGameMode::StorePlayerPositions()
 }
 void ATimeWarpGameMode::TranslatePlayerPositions()
 {
-	UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->SetActorLocation(p1PositionOverTime[positionIndex]);
-	UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->SetActorLocation(p2PositionOverTime[positionIndex]);
-
+	if (positionIndex < positionArraySize)
+	{
+		UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->SetActorLocation(p1PositionOverTime[positionIndex]);
+		UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->SetActorLocation(p2PositionOverTime[positionIndex]);
+	}
+	
 	positionIndex++;
 }
