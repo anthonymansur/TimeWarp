@@ -12,8 +12,8 @@
 #include "UObject/ConstructorHelpers.h"
 
 #define RECORD_FREQUENCY 0.002 // in seconds
-#define PREGAME_LENGTH 5.0
-#define GAME_LENGTH 30.0 
+#define PREGAME_LENGTH 2.0
+#define GAME_LENGTH 5.0 
 
 ATimeWarpGameMode::ATimeWarpGameMode()
 	: Super()
@@ -46,6 +46,9 @@ ATimeWarpGameMode::ATimeWarpGameMode()
 
 	}
 	positionIndex = 0;
+
+	static ConstructorHelpers::FClassFinder<AActor> LineClassFinder(TEXT("/Game/Line"));
+	PathLineClass = LineClassFinder.Class;
 }
 
 void ATimeWarpGameMode::PostLogin(APlayerController* NewPlayer)
@@ -242,6 +245,68 @@ void ATimeWarpGameMode::TranslatePlayerPositions()
 		UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->SetActorLocation(p1PositionOverTime[positionIndex]);
 		UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->SetActorLocation(p2PositionOverTime[positionIndex]);
 	}
+
+	DrawPaths();
 	
 	positionIndex++;
+}
+
+// helper function
+void ATimeWarpGameMode::DrawSinglePath(int i)
+{
+	if ((i + 1) >= p1PositionOverTime.Num())
+		return;
+	FVector posDiff = FVector(p1PositionOverTime[i + 1]) - FVector(p1PositionOverTime[i]);
+	posDiff[2] = 0;
+	float angle = acosf(Dot3(FVector(1, 0, 0), posDiff.GetSafeNormal()));
+	FTransform transform1 = FTransform();
+	transform1.SetLocation(FVector(p1PositionOverTime[i].X, p1PositionOverTime[i].Y, 171));
+	transform1.SetRotation(FQuat(0, 0, 1, angle));
+	transform1.SetScale3D(FVector(posDiff.Size(), 0.1, 1));
+
+	posDiff = FVector(p2PositionOverTime[i + 1]) - FVector(p2PositionOverTime[i]);
+	posDiff[2] = 0;
+	angle = acosf(Dot3(FVector(1, 0, 0), posDiff.GetSafeNormal()));
+	FTransform transform2 = FTransform();
+	transform2.SetLocation(FVector(p2PositionOverTime[i].X, p2PositionOverTime[i].Y, 171));
+	transform2.SetRotation(FQuat(0, 0, 1, angle));
+	transform2.SetScale3D(FVector(posDiff.Size(), 0.1, 1));
+
+
+	FActorSpawnParameters ActorSpawnParams;
+	Lines.Add(GetWorld()->SpawnActor<AActor>(PathLineClass, transform1, ActorSpawnParams));
+	Lines.Add(GetWorld()->SpawnActor<AActor>(PathLineClass, transform2, ActorSpawnParams));
+}
+
+void ATimeWarpGameMode::DrawPaths()
+{
+	static const float drawInterval = RECORD_FREQUENCY; // interval, in seconds, to draw line 
+	static const float drawLength = 0.5; // draw the path one second ahead 
+	static const int numOfLinesToDraw = 2 * (int)(drawLength / drawInterval);
+
+	if (Lines.Num() == 0)
+	{
+		for (int i = 0; i < numOfLinesToDraw; i++)
+		{
+			DrawSinglePath(i);
+		}
+	}
+	else
+	{
+		Lines[0]->Destroy();
+		Lines[1]->Destroy();
+		Lines.RemoveAt(0, 2); // remove first line 
+		if ((positionIndex + numOfLinesToDraw) < (p1PositionOverTime.Num() - 1))
+			DrawSinglePath(positionIndex + numOfLinesToDraw);
+	}
+
+	// delete all lines, if any 
+	/*for (AActor* line : Lines)
+	{
+		line->Destroy();
+
+	}
+	Lines.Empty();*/
+
+
 }

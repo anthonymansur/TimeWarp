@@ -45,6 +45,9 @@ protected:
 	int positionIndex;
 	int positionArraySize;
 
+	TSubclassOf<AActor> PathLineClass;
+	TArray<AActor*> Lines;
+
 protected:
 	void StartPathSelection();
 	void EndPathSelection();
@@ -54,6 +57,9 @@ protected:
 
 	void StorePlayerPositions();
 	void TranslatePlayerPositions();
+
+	void DrawPaths();
+	void DrawSinglePath(int i);
 };
 
 
