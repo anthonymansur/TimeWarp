@@ -8,8 +8,6 @@
 #include "TimeWarpPlayerState.h"
 #include "Engine/LevelScriptActor.h"
 
-#include <algorithm>
-
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -17,7 +15,10 @@
 
 #define RECORD_FREQUENCY 0.002 // in seconds
 #define PREGAME_LENGTH 5.0
-#define GAME_LENGTH 30.0 
+#define GAME_LENGTH 15.0
+
+#define RANDOM_SEED 123456
+#define NUM_AMMUNITIONS 400
 
 ATimeWarpGameMode::ATimeWarpGameMode()
 	: Super()
@@ -50,11 +51,36 @@ ATimeWarpGameMode::ATimeWarpGameMode()
 
 	}
 	positionIndex = 0;
+
+	// Initialize the random number generator
+	generator = std::default_random_engine(RANDOM_SEED);
+	static ConstructorHelpers::FClassFinder<AActor> AmmunitionBPClassFinder(TEXT("/Game/AmmunitionBP"));
+	ammunitionBPClass = AmmunitionBPClassFinder.Class;
 }
 
 void ATimeWarpGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	static_cast<ATimeWarpPlayerController*>(NewPlayer)->ClientPostLogin(NewPlayer);
+}
+
+void ATimeWarpGameMode::SpawnAmmunitions(int num_ammunitions) {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, "ATimeWarpGameMode::SpawnAmmunitions is being called");
+
+	const float mean = 0.0f;
+	const float stddev = 0.35f;
+
+	const FVector offset = FVector(-282.f, 0.f, 0.f);
+	const float scale = 850.0f;
+	std::normal_distribution<float> distribution(mean, stddev);
+	for (int i = 0; i < num_ammunitions; i++) {
+		const float x = distribution(generator) * scale;
+		const float y = distribution(generator) * scale;
+		const FVector SpawnLocation = FVector(x, y, 170.0f) + offset;
+		const FRotator SpawnRotation = FRotator(0.f, 0.f, 0.f);
+		FActorSpawnParameters ActorSpawnParams;
+		AActor* ammo = GetWorld()->SpawnActor<AActor>(ammunitionBPClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+		ammunitionPositions.Emplace(SpawnLocation);
+	}
 }
 
 void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* NewPlayer)
@@ -67,6 +93,9 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 
 	if (serverPlayerId == controllerPlayerId)
 	{
+		// Spawn ammunitions on the server
+		SpawnAmmunitions(NUM_AMMUNITIONS);
+
 		// server
 		player1Controller = NewPlayer;
 
