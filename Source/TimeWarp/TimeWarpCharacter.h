@@ -157,7 +157,7 @@ protected:
 	float MaxHealth;
 
 	/** The player's current health. When reduced to 0, they are considered dead. */
-	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
 
 	/** RepNotify for changes made to current health. */
