@@ -160,6 +160,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
 
+
+	/** The player's number of ammo*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurrentAmmo;
+
+
 	/** RepNotify for changes made to current health. */
 	UFUNCTION()
 	void OnRep_CurrentHealth();
@@ -192,6 +198,16 @@ public:
 	/** Setter for Current Health. Clamps the value between 0 and MaxHealth and calls OnHealthUpdate. Should only be called on the server.*/
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void SetCurrentHealth(float healthValue);
+
+
+	/** Getter for CurrentAmmo.*/
+	UFUNCTION(BlueprintPure, Category = "Ammo")
+	FORCEINLINE int GetCurrentAmmo() const { return CurrentAmmo; }
+
+	/** Setter for CurrentAmmo. */
+	UFUNCTION(BlueprintCallable, Category = "Ammo")
+	void SetCurrentAmmo(int ammoValue);
+
 
 	/** Event for taking damage. Overridden from APawn.*/
 	UFUNCTION(BlueprintCallable, Category = "Health")
