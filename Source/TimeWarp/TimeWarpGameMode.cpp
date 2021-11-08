@@ -18,7 +18,7 @@
 #define GAME_LENGTH 15.0
 
 #define RANDOM_SEED 123456
-#define NUM_AMMUNITIONS 400
+#define NUM_AMMUNITIONS 100
 
 ATimeWarpGameMode::ATimeWarpGameMode()
 	: Super()
