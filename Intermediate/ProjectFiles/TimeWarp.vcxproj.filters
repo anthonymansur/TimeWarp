@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\..\TimeWarp.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{9237AA8F-67E0-4750-A830-D06AC03E17DF}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\TimeWarp.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\TimeWarpEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\.gitignore" />
+    <None Include="..\..\README.md" />
+    <Filter Include="Config">
+      <UniqueIdentifier>{9B0C9F00-276B-4C49-AC5C-F490F47E4F0B}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEditorPerProjectUserSettings.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultGame.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Source\TimeWarp">
+      <UniqueIdentifier>{DA7C118A-4B5D-4B0D-92D4-DB9D4E72B254}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\TimeWarp\TimeWarp.Build.cs">
+      <Filter>Source\TimeWarp</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\TimeWarp\TimeWarp.cpp">
+      <Filter>Source\TimeWarp</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\TimeWarp\TimeWarp.h">
+      <Filter>Source\TimeWarp</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\TimeWarp\TimeWarpCharacter.cpp">
+      <Filter>Source\TimeWarp</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\TimeWarp\TimeWarpCharacter.h">
+      <Filter>Source\TimeWarp</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\TimeWarp\TimeWarpGameMode.cpp">
+      <Filter>Source\TimeWarp</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\TimeWarp\TimeWarpGameMode.h">
+      <Filter>Source\TimeWarp</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\TimeWarp\TimeWarpHUD.cpp">
+      <Filter>Source\TimeWarp</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\TimeWarp\TimeWarpHUD.h">
+      <Filter>Source\TimeWarp</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\TimeWarp\TimeWarpProjectile.cpp">
+      <Filter>Source\TimeWarp</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\TimeWarp\TimeWarpProjectile.h">
+      <Filter>Source\TimeWarp</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

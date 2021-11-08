@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "TimeWarp",
+			"Path": "C:\\Users\\nd_mo\\Desktop\\PennHwork\\568 Game Design\\TimeWarp\\TimeWarpProjectFolder\\TimeWarp\\Source\\TimeWarp.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "TimeWarpEditor",
+			"Path": "C:\\Users\\nd_mo\\Desktop\\PennHwork\\568 Game Design\\TimeWarp\\TimeWarpProjectFolder\\TimeWarp\\Source\\TimeWarpEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}

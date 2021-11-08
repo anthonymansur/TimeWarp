@@ -1,0 +1,29 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UE4Editor-TimeWarp-4348.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\TimeWarpEditor\Development\Engine\SharedPCH.Engine.ShadowErrors.h.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarp.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpCharacter.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpGameInstance.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpGameMode.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpGameState.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpHUD.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpPlayerController.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpPlayerState.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpProjectile.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarp.init.gen.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpCharacter.gen.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpGameInstance.gen.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpGameMode.gen.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpGameState.gen.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpHUD.gen.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpPlayerController.gen.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpPlayerState.gen.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\TimeWarpProjectile.gen.cpp.obj"
+"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\Default.rc2.res"
+/OUT:"C:\Users\nd_mo\Desktop\PennHwork\568 Game Design\TimeWarp\TimeWarpProjectFolder\TimeWarp\Intermediate\Build\Win64\UE4Editor\Development\TimeWarp\UE4Editor-TimeWarp-4348.lib"
