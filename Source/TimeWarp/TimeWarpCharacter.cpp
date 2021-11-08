@@ -103,6 +103,8 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 	MaxHealth = 100.0f;
 	CurrentHealth = MaxHealth;
 
+	CurrentAmmo = 10;
+
 	// Disable movement by default
 	bRotationEnabled = false;
 	bTranslationEnabled = false;
@@ -172,6 +174,12 @@ void ATimeWarpCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 void ATimeWarpCharacter::OnFire()
 {
+	if (CurrentAmmo < 1)
+	{
+		DisableShooting();
+		return;
+	}
+
 	if (!bCanShoot)
 		return;
 
@@ -179,6 +187,8 @@ void ATimeWarpCharacter::OnFire()
 	if (ProjectileClass != NULL)
 	{
 		HandleFire();
+		CurrentAmmo--;
+
 	}
 
 	// try and play the sound if specified
@@ -339,21 +349,21 @@ void ATimeWarpCharacter::OnHealthUpdate()
 	// Client-specific functionality
 	if (IsLocallyControlled())
 	{
-		FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+		//FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
 	}
 
 	// Server-specific functionality
 	if (GetLocalRole() == ROLE_Authority)
 	{
-		FString healthMessage = FString::Printf(TEXT("%s now has %f health remaining."), *GetFName().ToString(), CurrentHealth);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+		//FString healthMessage = FString::Printf(TEXT("%s now has %f health remaining."), *GetFName().ToString(), CurrentHealth);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
 	}
 
 	if (abs(CurrentHealth) <= 0.001f)
 	{
-		FString deathMessage = FString::Printf(TEXT("You have been killed."));
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
+		//FString deathMessage = FString::Printf(TEXT("You have been killed."));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
 
 		if (GetWorld()->IsServer())
 		{
@@ -376,6 +386,16 @@ void ATimeWarpCharacter::SetCurrentHealth(float healthValue)
 		OnHealthUpdate();
 	}
 }
+
+
+void ATimeWarpCharacter::SetCurrentAmmo(int ammoValue)
+{
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		CurrentAmmo = ammoValue;
+	}
+}
+
 
 float ATimeWarpCharacter::TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {

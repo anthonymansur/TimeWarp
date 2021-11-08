@@ -99,6 +99,11 @@ public:
 	TSubclassOf<AActor> PathLineClass;
 	TArray<AActor*> Lines;
 
+	/** The player's number of ammo*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurrentAmmo;
+
+
 protected:
 	
 	/** Fires a projectile. */
@@ -165,8 +170,9 @@ protected:
 	float MaxHealth;
 
 	/** The player's current health. When reduced to 0, they are considered dead. */
-	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
+
 
 	/** RepNotify for changes made to current health. */
 	UFUNCTION()
@@ -202,6 +208,16 @@ public:
 	/** Setter for Current Health. Clamps the value between 0 and MaxHealth and calls OnHealthUpdate. Should only be called on the server.*/
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void SetCurrentHealth(float healthValue);
+
+
+	/** Getter for CurrentAmmo.*/
+	UFUNCTION(BlueprintPure, Category = "Ammo")
+	FORCEINLINE int GetCurrentAmmo() const { return CurrentAmmo; }
+
+	/** Setter for CurrentAmmo. */
+	UFUNCTION(BlueprintCallable, Category = "Ammo")
+	void SetCurrentAmmo(int ammoValue);
+
 
 	/** Event for taking damage. Overridden from APawn.*/
 	UFUNCTION(BlueprintCallable, Category = "Health")

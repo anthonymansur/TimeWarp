@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <random>
+
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "TimerManager.h"
@@ -20,6 +22,9 @@ public:
 	/** Server function for spawning projectiles. */
 	UFUNCTION(Server, Reliable)
 	void RespawnPlayerEvent(APlayerController* NewPlayer);
+
+	// Funciton for spawning ammunitions
+	void SpawnAmmunitions(int num_ammunitions);
 
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 
@@ -50,6 +55,11 @@ protected:
 
 	TSubclassOf<AActor> PathLineClass;
 	TArray<AActor*> Lines;
+	
+	// For random number generation
+	std::default_random_engine generator;
+	TArray<FVector> ammunitionPositions;
+	TSubclassOf<AActor> ammunitionBPClass;
 
 protected:
 	void StartPathSelection();
