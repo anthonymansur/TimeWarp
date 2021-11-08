@@ -8,6 +8,8 @@
 #include "TimeWarpPlayerState.h"
 #include "Engine/LevelScriptActor.h"
 
+#include <algorithm>
+
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
