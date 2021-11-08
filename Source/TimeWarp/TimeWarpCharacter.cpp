@@ -334,21 +334,21 @@ void ATimeWarpCharacter::OnHealthUpdate()
 	// Client-specific functionality
 	if (IsLocallyControlled())
 	{
-		FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+		//FString healthMessage = FString::Printf(TEXT("You now have %f health remaining."), CurrentHealth);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
 	}
 
 	// Server-specific functionality
 	if (GetLocalRole() == ROLE_Authority)
 	{
-		FString healthMessage = FString::Printf(TEXT("%s now has %f health remaining."), *GetFName().ToString(), CurrentHealth);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
+		//FString healthMessage = FString::Printf(TEXT("%s now has %f health remaining."), *GetFName().ToString(), CurrentHealth);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, healthMessage);
 	}
 
 	if (abs(CurrentHealth) <= 0.001f)
 	{
-		FString deathMessage = FString::Printf(TEXT("You have been killed."));
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
+		//FString deathMessage = FString::Printf(TEXT("You have been killed."));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, deathMessage);
 
 		if (GetWorld()->IsServer())
 		{
