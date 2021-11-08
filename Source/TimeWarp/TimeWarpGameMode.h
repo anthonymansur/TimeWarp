@@ -26,6 +26,8 @@ public:
 	virtual void HandleMatchHasStarted() override;
 	void EndElimination();
 
+	float getRecordFrequency();
+
 protected:
 	AActor* playerStart1;
 	AActor* playerStart2;
@@ -37,11 +39,12 @@ protected:
 	FTimerHandle handle_pathSelection;
 	FTimerHandle handle_pathSelectionEnd;
 	FTimerHandle handle_lighting;
+	FTimerHandle handle_preelimination;
 	FTimerHandle handle_elimination;
 	FTimerHandle handle_eliminationEnd;
 
-	TArray<FVector> p1PositionOverTime;
-	TArray<FVector> p2PositionOverTime;
+	TArray<FVector>* p1PositionOverTime;
+	TArray<FVector>* p2PositionOverTime;
 	int positionIndex;
 	int positionArraySize;
 
@@ -53,6 +56,7 @@ protected:
 	void EndPathSelection();
 	void StartLightingStage();
 	void EndLightingStage();
+	void PreEliminationStage();
 	void StartEliminationStage();
 
 	void StorePlayerPositions();

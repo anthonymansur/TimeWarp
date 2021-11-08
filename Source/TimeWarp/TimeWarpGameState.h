@@ -30,6 +30,13 @@ class TIMEWARP_API ATimeWarpGameState : public AGameState
 	GENERATED_BODY()
 
 protected:
-
+	UPROPERTY(replicated)
+	TArray<FVector> p1PositionOverTime;
+	UPROPERTY(replicated)
+	TArray<FVector> p2PositionOverTime;
 public:
+	TArray<FVector>* getP1Position();
+	TArray<FVector>* getP2Position();
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutlifetimeProps) const override;
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "TimerManager.h"
 #include "TimeWarpCharacter.generated.h"
 
 class UInputComponent;
@@ -91,6 +92,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	uint32 bUsingMotionControllers : 1;
 
+	//UPROPERTY(replicated)
+	TArray<FVector>* PositionBuffer;
+	int posInx;
+
+	TSubclassOf<AActor> PathLineClass;
+	TArray<AActor*> Lines;
+
 protected:
 	
 	/** Fires a projectile. */
@@ -175,6 +183,8 @@ protected:
 	UPROPERTY(Replicated)
 	bool bCanShoot;
 
+	FTimerHandle handle_drawPath;
+
 public:
 	/** Returns Mesh1P subobject **/
 	FORCEINLINE class USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
@@ -206,5 +216,16 @@ public:
 	void DisableRotation();
 	void DisableTranslation();
 	void DisableShooting();
+
+	UFUNCTION(Client, Reliable)
+	void SendPositionArray(bool player1); // TODO: change name 
+
+	void DrawPaths();
+	void DrawSinglePath(int i);
+
+	UFUNCTION(Client, Reliable)
+	void StartDrawPathCommand();
+	UFUNCTION(Client, Reliable)
+	void EndDrawpathCommand();
 };
 

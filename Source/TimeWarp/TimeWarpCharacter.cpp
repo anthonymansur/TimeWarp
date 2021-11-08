@@ -109,6 +109,10 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 
 	// Disable firing by default
 	bCanShoot = false;
+
+	// path highlight
+	static ConstructorHelpers::FClassFinder<AActor> LineClassFinder(TEXT("/Game/Line"));
+	PathLineClass = LineClassFinder.Class;
 }
 
 void ATimeWarpCharacter::BeginPlay()
@@ -130,6 +134,7 @@ void ATimeWarpCharacter::BeginPlay()
 		VR_Gun->SetHiddenInGame(true, true);
 		Mesh1P->SetHiddenInGame(false, true);
 	}
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -463,4 +468,68 @@ void ATimeWarpCharacter::HandleFire_Implementation()
 		}
 	}
 }
+
+// helper function
+void ATimeWarpCharacter::DrawSinglePath(int i)
+{
+	if ((i + 10) >= PositionBuffer->Num())
+		return;
+	FVector posDiff = FVector((*PositionBuffer)[i + 10]) - FVector((*PositionBuffer)[i]);
+	posDiff[2] = 0;
+	float angle = FMath::Acos(FVector::DotProduct(FVector(1, 0, 0), posDiff.GetSafeNormal()));
+	FTransform transform = FTransform();
+	transform.SetLocation(FVector((*PositionBuffer)[i].X, (*PositionBuffer)[i].Y, 171));
+	transform.SetRotation(FQuat(0, 0, 1, angle));
+
+	FActorSpawnParameters ActorSpawnParams;
+	Lines.Add(GetWorld()->SpawnActor<AActor>(PathLineClass, transform, ActorSpawnParams));
+	Lines.Last()->SetActorScale3D(FVector(0.1, 2, 1));
+}
+
+void ATimeWarpCharacter::DrawPaths()
+{
+	static ATimeWarpGameMode* gameMode = static_cast<ATimeWarpGameMode*>(GetWorld()->GetAuthGameMode());
+	static const float drawInterval = 0.002; // interval, in seconds, to draw line 
+	static const float drawLength = 0.5; // draw the path one second ahead 
+	static const int numOfLinesToDraw = 2 * (int)(drawLength / drawInterval);
+
+	if (Lines.Num() == 0)
+	{
+		for (int i = 0; i < numOfLinesToDraw; i++)
+		{
+			DrawSinglePath(i);
+		}
+	}
+	else
+	{
+		Lines[0]->Destroy();
+		Lines.RemoveAt(0);
+		if ((posInx + numOfLinesToDraw) < (PositionBuffer->Num() - 1))
+			DrawSinglePath(posInx + numOfLinesToDraw);
+	}
+	posInx++;
+}
+
+void ATimeWarpCharacter::SendPositionArray_Implementation(bool player1)
+{
+	if (player1)
+		PositionBuffer = static_cast<ATimeWarpGameState*>(GetWorld()->GetGameState())->getP1Position(); 
+	else
+		PositionBuffer = static_cast<ATimeWarpGameState*>(GetWorld()->GetGameState())->getP2Position();
+}
+
+void ATimeWarpCharacter::StartDrawPathCommand_Implementation()
+{
+	ATimeWarpGameMode* gameMode = static_cast<ATimeWarpGameMode*>(GetWorld()->GetAuthGameMode());
+	const float drawInterval = 0.002; // interval, in seconds, to draw line 
+	GetWorldTimerManager().SetTimer(handle_drawPath, this, &ATimeWarpCharacter::DrawPaths, drawInterval, true, 0.f);
+
+}
+void ATimeWarpCharacter::EndDrawpathCommand_Implementation()
+{
+	GetWorldTimerManager().ClearTimer(handle_drawPath);
+}
+
+// TODO: CHANGE DRAW INTERVAL TO GET FROM GAME STATE
+// TODO: REVERT BACK TO PREVIOUS APPROACH OF LINE SPAWNING 
 

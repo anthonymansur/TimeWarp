@@ -12,7 +12,7 @@
 #include "UObject/ConstructorHelpers.h"
 
 #define RECORD_FREQUENCY 0.002 // in seconds
-#define PREGAME_LENGTH 2.0
+#define PREGAME_LENGTH 5.0
 #define GAME_LENGTH 5.0 
 
 ATimeWarpGameMode::ATimeWarpGameMode()
@@ -45,6 +45,7 @@ ATimeWarpGameMode::ATimeWarpGameMode()
 		playerStart2 = actors[1];
 
 	}
+
 	positionIndex = 0;
 
 	static ConstructorHelpers::FClassFinder<AActor> LineClassFinder(TEXT("/Game/Line"));
@@ -123,13 +124,16 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 
 void ATimeWarpGameMode::HandleMatchHasStarted()
 {
+	p1PositionOverTime = static_cast<ATimeWarpGameState*>(GameState)->getP1Position();
+	p2PositionOverTime = static_cast<ATimeWarpGameState*>(GameState)->getP2Position();
+
 	for (APlayerState* Player : GameState->PlayerArray)
 	{
 		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
 		pawn->AllowRotation();
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Match will begin shortly.");
+	GEngine->AddOnScreenDebugMessage(-1, PREGAME_LENGTH - 0.5f, FColor::Blue, "Match will begin shortly.");
 
 	GetWorldTimerManager().SetTimer(handle_gameStarting, this, &ATimeWarpGameMode::StartPathSelection, PREGAME_LENGTH, false, -1.f);
 }
@@ -145,7 +149,7 @@ void ATimeWarpGameMode::StartPathSelection()
 		pawn->AllowTranslation();
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Path Selection started!");
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, "Path Selection started!");
 
 	GetWorldTimerManager().SetTimer(handle_pathSelection, this, &ATimeWarpGameMode::StorePlayerPositions, RECORD_FREQUENCY, true, 0.f);
 	GetWorldTimerManager().SetTimer(handle_pathSelectionEnd, this, &ATimeWarpGameMode::EndPathSelection, GAME_LENGTH, false, -1.f);
@@ -163,9 +167,10 @@ void ATimeWarpGameMode::EndPathSelection()
 	// Invalidate path selection timers
 	GetWorldTimerManager().ClearTimer(handle_pathSelection);
 
-	positionArraySize = std::min(p1PositionOverTime.Num(), p2PositionOverTime.Num());
+	positionArraySize = std::min(p1PositionOverTime->Num(), p2PositionOverTime->Num());
 
-	StartEliminationStage();
+
+	PreEliminationStage();
 }
 
 void ATimeWarpGameMode::StartLightingStage()
@@ -176,21 +181,60 @@ void ATimeWarpGameMode::EndLightingStage()
 {
 	// TODO: implement
 }
+
+void ATimeWarpGameMode::PreEliminationStage()
+{
+	TranslatePlayerPositions();
+
+	int i = 0;
+	for (APlayerState* Player : GameState->PlayerArray)
+	{
+		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
+		pawn->DisableTranslation();
+		if (i == 0)
+			static_cast<ATimeWarpPlayerController*>(pawn->GetController())->ForceControlRotation(playerStart1->GetActorRotation());
+		else
+			static_cast<ATimeWarpPlayerController*>(pawn->GetController())->ForceControlRotation(playerStart2->GetActorRotation());
+		if (i == 0)
+			pawn->SendPositionArray(true);
+		else
+			pawn->SendPositionArray(false);
+		i++;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, PREGAME_LENGTH - 0.5f, FColor::Blue, "Elimination will begin shortly.");
+
+	GetWorldTimerManager().SetTimer(handle_preelimination, this, &ATimeWarpGameMode::StartEliminationStage, PREGAME_LENGTH, false, -1.f);
+}
+
 void ATimeWarpGameMode::StartEliminationStage()
 {
 
 	for (APlayerState* Player : GameState->PlayerArray)
 	{
 		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
-		pawn->DisableTranslation();
 		pawn->AllowShooting();
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Elimination started!");
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, "Elimination started!");
 
 	GetWorldTimerManager().SetTimer(handle_elimination, this, &ATimeWarpGameMode::TranslatePlayerPositions, RECORD_FREQUENCY, true, 0.f);
 	GetWorldTimerManager().SetTimer(handle_eliminationEnd, this, &ATimeWarpGameMode::EndElimination, GAME_LENGTH, false, -1.f);
+
+	// set the draw commands for each player here 
+	/*for (APlayerState* Player : GameState->PlayerArray)
+	{
+		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
+		pawn->StartDrawPathCommand();
+	}*/
+	for (int i = 0; i < 2; i++)
+	{
+		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(UGameplayStatics::GetPlayerPawn(GetWorld(), i));
+		pawn->StartDrawPathCommand();
+	}
 }
+
+
 void ATimeWarpGameMode::EndElimination()
 {
 	// invalidate elimination timer
@@ -216,6 +260,8 @@ void ATimeWarpGameMode::EndElimination()
 		}
 		pawn->DisableTranslation();
 		pawn->DisableShooting();
+
+		pawn->EndDrawpathCommand();
 	}
 
 	FString debug;
@@ -235,18 +281,18 @@ void ATimeWarpGameMode::StorePlayerPositions()
 	FVector p1Pos = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation();
 	FVector p2Pos = UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->GetActorLocation();
 
-	p1PositionOverTime.Emplace(p1Pos);
-	p2PositionOverTime.Emplace(p2Pos);
+	p1PositionOverTime->Emplace(p1Pos);
+	p2PositionOverTime->Emplace(p2Pos);
 }
 void ATimeWarpGameMode::TranslatePlayerPositions()
 {
 	if (positionIndex < positionArraySize)
 	{
-		UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->SetActorLocation(p1PositionOverTime[positionIndex]);
-		UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->SetActorLocation(p2PositionOverTime[positionIndex]);
+		UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->SetActorLocation((*p1PositionOverTime)[positionIndex]);
+		UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->SetActorLocation((*p2PositionOverTime)[positionIndex]);
 	}
 
-	DrawPaths();
+	//DrawPaths();
 	
 	positionIndex++;
 }
@@ -254,27 +300,28 @@ void ATimeWarpGameMode::TranslatePlayerPositions()
 // helper function
 void ATimeWarpGameMode::DrawSinglePath(int i)
 {
-	if ((i + 1) >= p1PositionOverTime.Num())
+	if ((i + 10) >= p1PositionOverTime->Num())
 		return;
-	FVector posDiff = FVector(p1PositionOverTime[i + 1]) - FVector(p1PositionOverTime[i]);
+	FVector posDiff = FVector((*p1PositionOverTime)[i + 10]) - FVector((*p1PositionOverTime)[i]);
 	posDiff[2] = 0;
-	float angle = acosf(Dot3(FVector(1, 0, 0), posDiff.GetSafeNormal()));
+	float angle = FMath::Acos(FVector::DotProduct(FVector(1, 0, 0), posDiff.GetSafeNormal()));
 	FTransform transform1 = FTransform();
-	transform1.SetLocation(FVector(p1PositionOverTime[i].X, p1PositionOverTime[i].Y, 171));
+	transform1.SetLocation(FVector((*p1PositionOverTime)[i].X, (*p1PositionOverTime)[i].Y, 171));
 	transform1.SetRotation(FQuat(0, 0, 1, angle));
-	transform1.SetScale3D(FVector(posDiff.Size(), 0.1, 1));
+	//transform1.SetScale3D(FVector(10, 0.1, 1));
 
-	posDiff = FVector(p2PositionOverTime[i + 1]) - FVector(p2PositionOverTime[i]);
+	posDiff = FVector((*p2PositionOverTime)[i + 1]) - FVector((*p2PositionOverTime)[i]);
 	posDiff[2] = 0;
-	angle = acosf(Dot3(FVector(1, 0, 0), posDiff.GetSafeNormal()));
+	angle = 0;// FMath::Acos(FVector::DotProduct(FVector(1, 0, 0), posDiff.GetSafeNormal()));
 	FTransform transform2 = FTransform();
-	transform2.SetLocation(FVector(p2PositionOverTime[i].X, p2PositionOverTime[i].Y, 171));
+	transform2.SetLocation(FVector((*p2PositionOverTime)[i].X, (*p2PositionOverTime)[i].Y, 171));
 	transform2.SetRotation(FQuat(0, 0, 1, angle));
 	transform2.SetScale3D(FVector(posDiff.Size(), 0.1, 1));
 
 
 	FActorSpawnParameters ActorSpawnParams;
 	Lines.Add(GetWorld()->SpawnActor<AActor>(PathLineClass, transform1, ActorSpawnParams));
+	Lines.Last()->SetActorScale3D(FVector(0.1, 2, 1));
 	Lines.Add(GetWorld()->SpawnActor<AActor>(PathLineClass, transform2, ActorSpawnParams));
 }
 
@@ -296,7 +343,7 @@ void ATimeWarpGameMode::DrawPaths()
 		Lines[0]->Destroy();
 		Lines[1]->Destroy();
 		Lines.RemoveAt(0, 2); // remove first line 
-		if ((positionIndex + numOfLinesToDraw) < (p1PositionOverTime.Num() - 1))
+		if ((positionIndex + numOfLinesToDraw) < (p1PositionOverTime->Num() - 1))
 			DrawSinglePath(positionIndex + numOfLinesToDraw);
 	}
 
@@ -309,4 +356,9 @@ void ATimeWarpGameMode::DrawPaths()
 	Lines.Empty();*/
 
 
+}
+
+float ATimeWarpGameMode::getRecordFrequency()
+{
+	return (float) RECORD_FREQUENCY;
 }
