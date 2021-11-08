@@ -91,6 +91,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	uint32 bUsingMotionControllers : 1;
 
+
+	/** The player's number of ammo*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurrentAmmo;
+
+
 protected:
 	
 	/** Fires a projectile. */
@@ -159,11 +165,6 @@ protected:
 	/** The player's current health. When reduced to 0, they are considered dead. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
-
-
-	/** The player's number of ammo*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int CurrentAmmo;
 
 
 	/** RepNotify for changes made to current health. */

@@ -103,7 +103,7 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 	MaxHealth = 100.0f;
 	CurrentHealth = MaxHealth;
 
-	CurrentAmmo = 25;
+	CurrentAmmo = 10;
 
 	// Disable movement by default
 	bRotationEnabled = false;
