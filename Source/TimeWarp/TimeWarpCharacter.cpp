@@ -103,6 +103,8 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 	MaxHealth = 100.0f;
 	CurrentHealth = MaxHealth;
 
+	CurrentAmmo = 25;
+
 	// Disable movement by default
 	bRotationEnabled = false;
 	bTranslationEnabled = false;
@@ -167,6 +169,12 @@ void ATimeWarpCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 void ATimeWarpCharacter::OnFire()
 {
+	if (CurrentAmmo < 1)
+	{
+		DisableShooting();
+		return;
+	}
+
 	if (!bCanShoot)
 		return;
 
@@ -174,6 +182,8 @@ void ATimeWarpCharacter::OnFire()
 	if (ProjectileClass != NULL)
 	{
 		HandleFire();
+		CurrentAmmo--;
+
 	}
 
 	// try and play the sound if specified
@@ -371,6 +381,16 @@ void ATimeWarpCharacter::SetCurrentHealth(float healthValue)
 		OnHealthUpdate();
 	}
 }
+
+
+void ATimeWarpCharacter::SetCurrentAmmo(int ammoValue)
+{
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		CurrentAmmo = ammoValue;
+	}
+}
+
 
 float ATimeWarpCharacter::TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
