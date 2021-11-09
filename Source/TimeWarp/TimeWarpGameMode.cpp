@@ -18,7 +18,9 @@
 #define GAME_LENGTH 15.0
 
 #define RANDOM_SEED 123456
-#define NUM_AMMUNITIONS 100
+#define NUM_AMMUNITIONS 20
+
+#define FLOOR_HEIGHT 170.f
 
 ATimeWarpGameMode::ATimeWarpGameMode()
 	: Super()
@@ -69,7 +71,7 @@ void ATimeWarpGameMode::PostLogin(APlayerController* NewPlayer)
 
 void ATimeWarpGameMode::SpawnAmmunitions(int num_ammunitions) {
 	const float mean = 0.0f;
-	const float stddev = 0.5f;
+	const float stddev = .8f;
 
 	const FVector offset = FVector(-282.f, 0.f, 0.f);
 	const float scale = 850.0f;
@@ -77,7 +79,7 @@ void ATimeWarpGameMode::SpawnAmmunitions(int num_ammunitions) {
 	for (int i = 0; i < num_ammunitions; i++) {
 		const float x = distribution(generator) * scale;
 		const float y = distribution(generator) * scale;
-		const FVector SpawnLocation = FVector(x, y, 170.0f) + offset;
+		const FVector SpawnLocation = FVector(x, y, FLOOR_HEIGHT + 20.0f) + offset;
 		const FRotator SpawnRotation = FRotator(0.f, 0.f, 0.f);
 		FActorSpawnParameters ActorSpawnParams;
 		AActor* ammo = GetWorld()->SpawnActor<AActor>(ammunitionBPClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
