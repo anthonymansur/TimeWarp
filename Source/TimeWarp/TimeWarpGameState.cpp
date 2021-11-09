@@ -38,6 +38,8 @@ FScore ATimeWarpGameState::getScore()
 }
 bool ATimeWarpGameState::incrementScore(bool player1)
 {
+	if (GetWorld()->GetAuthGameMode() == nullptr)
+		return false;
 	if (player1)
 	{
 		Score.player1 += 1;

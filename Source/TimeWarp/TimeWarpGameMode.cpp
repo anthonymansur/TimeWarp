@@ -54,9 +54,6 @@ ATimeWarpGameMode::ATimeWarpGameMode()
 	}
 
 	positionIndex = 0;
-
-	static ConstructorHelpers::FClassFinder<AActor> LineClassFinder(TEXT("/Game/Line"));
-	PathLineClass = LineClassFinder.Class;
 	
 	// Initialize the random number generator
 	generator = std::default_random_engine(RANDOM_SEED);
@@ -83,7 +80,8 @@ void ATimeWarpGameMode::SpawnAmmunitions(int num_ammunitions) {
 		const FRotator SpawnRotation = FRotator(0.f, 0.f, 0.f);
 		FActorSpawnParameters ActorSpawnParams;
 		AActor* ammo = GetWorld()->SpawnActor<AActor>(ammunitionBPClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-		ammunitionPositions.Emplace(SpawnLocation);
+		//ammunitionPositions.Emplace(SpawnLocation);
+		ammunitions.Add(ammo);
 	}
 }
 
@@ -97,9 +95,6 @@ void ATimeWarpGameMode::RespawnPlayerEvent_Implementation(APlayerController* New
 
 	if (serverPlayerId == controllerPlayerId)
 	{
-		// Spawn ammunitions on the server
-		SpawnAmmunitions(NUM_AMMUNITIONS);
-
 		// server
 		player1Controller = NewPlayer;
 
@@ -166,6 +161,9 @@ void ATimeWarpGameMode::HandleMatchHasStarted()
 		pawn->AllowRotation();
 	}
 
+	// Spawn ammunitions
+	SpawnAmmunitions(NUM_AMMUNITIONS);
+
 	GEngine->AddOnScreenDebugMessage(-1, PREGAME_LENGTH - 0.5f, FColor::Blue, "Match will begin shortly.");
 
 	GetWorldTimerManager().SetTimer(handle_gameStarting, this, &ATimeWarpGameMode::StartPathSelection, PREGAME_LENGTH, false, -1.f);
@@ -180,6 +178,7 @@ void ATimeWarpGameMode::StartPathSelection()
 	{
 		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
 		pawn->AllowTranslation();
+		pawn->SetTimeRemaining(GAME_LENGTH);
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Blue, "Path Selection started!");
@@ -235,6 +234,13 @@ void ATimeWarpGameMode::PreEliminationStage()
 		i++;
 	}
 
+	// remove ammo from map
+	for (AActor* ammo : ammunitions)
+	{
+		ammo->Destroy();
+	}
+	ammunitions.Empty();
+
 	GEngine->AddOnScreenDebugMessage(-1, PREGAME_LENGTH - 0.5f, FColor::Blue, "Elimination will begin shortly.");
 
 	GetWorldTimerManager().SetTimer(handle_preelimination, this, &ATimeWarpGameMode::StartEliminationStage, PREGAME_LENGTH, false, -1.f);
@@ -259,6 +265,7 @@ void ATimeWarpGameMode::StartEliminationStage()
 	{
 		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(UGameplayStatics::GetPlayerPawn(GetWorld(), i));
 		pawn->StartDrawPathCommand();
+		pawn->SetTimeRemaining(GAME_LENGTH);
 	}
 }
 
@@ -269,7 +276,7 @@ void ATimeWarpGameMode::EndElimination()
 	GetWorldTimerManager().ClearTimer(handle_elimination);
 	GetWorldTimerManager().ClearTimer(handle_eliminationEnd); // For when this function is called prematurely
 
-	bool player1Dead = false; 
+	bool player1Dead = false;
 	bool player2Dead = false;
 	for (int i = 0; i < 2; i++)
 	{
@@ -289,7 +296,7 @@ void ATimeWarpGameMode::EndElimination()
 		pawn->DisableTranslation();
 		pawn->DisableShooting();
 
-		pawn->EndDrawpathCommand();
+		pawn->EndDrawPathCommand();
 	}
 
 	FString debug;
@@ -339,6 +346,7 @@ void ATimeWarpGameMode::ResetRound()
 
 		pawn->SetCurrentAmmo(10);
 		pawn->SetCurrentHealth(100);
+		pawn->SetTimeRemaining(0);
 		i++;
 	}
 

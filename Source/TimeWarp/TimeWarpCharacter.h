@@ -99,10 +99,6 @@ public:
 	TSubclassOf<AActor> PathLineClass;
 	TArray<AActor*> Lines;
 
-	/** The player's number of ammo*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int CurrentAmmo;
-
 protected:
 	
 	/** Fires a projectile. */
@@ -172,6 +168,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
 
+	/** The player's number of ammo*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, replicated)
+	int CurrentAmmo;
+
+	/** The time remaining*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, replicated)
+	int timeRemaining;
 
 	/** RepNotify for changes made to current health. */
 	UFUNCTION()
@@ -189,6 +192,7 @@ protected:
 	bool bCanShoot;
 
 	FTimerHandle handle_drawPath;
+	FTimerHandle handle_timeRemaining;
 
 public:
 	/** Returns Mesh1P subobject **/
@@ -241,6 +245,11 @@ public:
 	UFUNCTION(Client, Reliable)
 	void StartDrawPathCommand();
 	UFUNCTION(Client, Reliable)
-	void EndDrawpathCommand();
+	void EndDrawPathCommand();
+	
+	UFUNCTION(Client, Reliable)
+	void SetTimeRemaining(int time);
+
+	void UpdateTime();
 };
 

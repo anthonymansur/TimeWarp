@@ -401,9 +401,13 @@ void ATimeWarpCharacter::SetCurrentAmmo(int ammoValue)
 
 float ATimeWarpCharacter::TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	float damageApplied = CurrentHealth - DamageTaken;
-	SetCurrentHealth(damageApplied);
-	return damageApplied;
+	if (CurrentHealth > 0.01f)
+	{
+		float damageApplied = CurrentHealth - DamageTaken;
+		SetCurrentHealth(damageApplied);
+		return damageApplied;
+	}
+	return 0;
 }
 
 bool ATimeWarpCharacter::IsDead()
@@ -448,9 +452,11 @@ void ATimeWarpCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& 
 
 	//Replicate current health.
 	DOREPLIFETIME(ATimeWarpCharacter, CurrentHealth);
+	DOREPLIFETIME(ATimeWarpCharacter, CurrentAmmo);
 	DOREPLIFETIME(ATimeWarpCharacter, bRotationEnabled);
 	DOREPLIFETIME(ATimeWarpCharacter, bTranslationEnabled);
 	DOREPLIFETIME(ATimeWarpCharacter, bCanShoot);
+	DOREPLIFETIME(ATimeWarpCharacter, timeRemaining);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -547,10 +553,29 @@ void ATimeWarpCharacter::StartDrawPathCommand_Implementation()
 	GetWorldTimerManager().SetTimer(handle_drawPath, this, &ATimeWarpCharacter::DrawPaths, drawInterval, true, 0.f);
 
 }
-void ATimeWarpCharacter::EndDrawpathCommand_Implementation()
+void ATimeWarpCharacter::EndDrawPathCommand_Implementation()
 {
 	GetWorldTimerManager().ClearTimer(handle_drawPath);
-	Lines.Pop()->Destroy();
+	int size = Lines.Num();
+	for (int i = 0; i < size; i++)
+		Lines.Pop()->Destroy();
 	posInx = 0;
+}
+
+void ATimeWarpCharacter::SetTimeRemaining_Implementation(int time)
+{
+	timeRemaining = time;
+
+	if (time > 0)
+	{
+		GetWorldTimerManager().SetTimer(handle_timeRemaining, this, &ATimeWarpCharacter::UpdateTime, 1, true, 0.f);
+	}
+}
+
+void ATimeWarpCharacter::UpdateTime()
+{
+	timeRemaining -= 1;
+	if (timeRemaining == 0)
+		GetWorldTimerManager().ClearTimer(handle_timeRemaining);
 }
 
