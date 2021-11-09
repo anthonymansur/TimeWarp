@@ -39,5 +39,9 @@ public:
 	//The damage dealt by this projectile.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Damage")
 	float Damage;
+
+	/** Sound to play each time we fire */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
+	class USoundBase* HitSound;
 };
 

@@ -52,6 +52,12 @@ void ATimeWarpProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 		if (OtherActor->IsA(ATimeWarpCharacter::StaticClass()) && GetInstigator() != NULL)
 		{
 			UGameplayStatics::ApplyPointDamage(OtherActor, Damage, NormalImpulse, Hit, GetInstigator()->Controller, this, DamageType);
+
+			// try and play the sound if specified
+			if (HitSound != NULL)
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+			}
 		}
 		if ((OtherComp != NULL) && OtherComp->IsSimulatingPhysics())
 		{

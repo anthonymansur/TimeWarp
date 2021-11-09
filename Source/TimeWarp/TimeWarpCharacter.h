@@ -103,7 +103,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int CurrentAmmo;
 
-
 protected:
 	
 	/** Fires a projectile. */
