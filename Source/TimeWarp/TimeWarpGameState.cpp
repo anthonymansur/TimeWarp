@@ -8,12 +8,18 @@
 #include "Net/UnrealNetwork.h"
 
 
+ATimeWarpGameState::ATimeWarpGameState()
+{
+	Score.winScore = 3;
+}
+
 void ATimeWarpGameState::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ATimeWarpGameState, p1PositionOverTime);
 	DOREPLIFETIME(ATimeWarpGameState, p2PositionOverTime);
+	DOREPLIFETIME(ATimeWarpGameState, Score);
 }
 
 TArray<FVector>* ATimeWarpGameState::getP1Position()
@@ -24,4 +30,30 @@ TArray<FVector>* ATimeWarpGameState::getP1Position()
 TArray<FVector>* ATimeWarpGameState::getP2Position()
 {
 	return &p2PositionOverTime;
+}
+
+FScore ATimeWarpGameState::getScore()
+{
+	return Score;
+}
+bool ATimeWarpGameState::incrementScore(bool player1)
+{
+	if (player1)
+	{
+		Score.player1 += 1;
+		if (Score.player1 == Score.winScore)
+			return true;
+	}
+	else
+	{
+		Score.player2 += 1;
+		if (Score.player2 == Score.winScore)
+			return true;
+	}
+	return false;
+}
+void ATimeWarpGameState::resetScore()
+{
+	Score.player1 = 0;
+	Score.player2 = 0;
 }

@@ -45,6 +45,7 @@ protected:
 	FTimerHandle handle_preelimination;
 	FTimerHandle handle_elimination;
 	FTimerHandle handle_eliminationEnd;
+	FTimerHandle handle_roundreset;
 
 	TArray<FVector>* p1PositionOverTime;
 	TArray<FVector>* p2PositionOverTime;
@@ -66,6 +67,7 @@ protected:
 	void EndLightingStage();
 	void PreEliminationStage();
 	void StartEliminationStage();
+	void ResetRound();
 
 	void StorePlayerPositions();
 	void TranslatePlayerPositions();

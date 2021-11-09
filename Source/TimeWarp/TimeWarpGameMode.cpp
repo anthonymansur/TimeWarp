@@ -15,7 +15,7 @@
 
 #define RECORD_FREQUENCY 0.002 // NOTE: this is also defined in TimeWarpCharacter
 #define PREGAME_LENGTH 5.0
-#define GAME_LENGTH 15.0
+#define GAME_LENGTH 10.0
 
 #define RANDOM_SEED 123456
 #define NUM_AMMUNITIONS 20
@@ -299,9 +299,55 @@ void ATimeWarpGameMode::EndElimination()
 		debug = FString::Printf(TEXT("Player 2 won!"));
 	else
 		debug = FString::Printf(TEXT("Draw!"));
+	GEngine->AddOnScreenDebugMessage(-1, PREGAME_LENGTH, FColor::Red, debug);
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Match ended");
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, debug);
+
+	bool end = false;
+	if (player1Dead)
+		end = static_cast<ATimeWarpGameState*>(GameState)->incrementScore(false);
+	else if (player2Dead)
+		end = static_cast<ATimeWarpGameState*>(GameState)->incrementScore(true);
+
+	if (end)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, "Match ended");
+	}
+	else
+	{
+		GetWorldTimerManager().SetTimer(handle_gameStarting, this, &ATimeWarpGameMode::ResetRound, PREGAME_LENGTH, false, -1.f);
+	}
+}
+
+void ATimeWarpGameMode::ResetRound()
+{
+	int i = 0;
+	for (APlayerState* Player : GameState->PlayerArray)
+	{
+		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(Player->GetPawn());
+		pawn->DisableTranslation();
+		pawn->AllowRotation();
+		if (i == 0)
+		{
+			pawn->SetActorLocation(playerStart1->GetActorLocation());
+			static_cast<ATimeWarpPlayerController*>(pawn->GetController())->ForceControlRotation(playerStart1->GetActorRotation());
+		}
+		else
+		{
+			pawn->SetActorLocation(playerStart2->GetActorLocation());
+			static_cast<ATimeWarpPlayerController*>(pawn->GetController())->ForceControlRotation(playerStart2->GetActorRotation());
+		}
+
+		pawn->SetCurrentAmmo(10);
+		pawn->SetCurrentHealth(100);
+		i++;
+	}
+
+	p1PositionOverTime->Empty();
+	p2PositionOverTime->Empty();
+	positionIndex = 0;
+	positionArraySize = 0;
+
+	HandleMatchHasStarted();
 }
 
 void ATimeWarpGameMode::StorePlayerPositions()

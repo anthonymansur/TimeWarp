@@ -550,5 +550,7 @@ void ATimeWarpCharacter::StartDrawPathCommand_Implementation()
 void ATimeWarpCharacter::EndDrawpathCommand_Implementation()
 {
 	GetWorldTimerManager().ClearTimer(handle_drawPath);
+	Lines.Pop()->Destroy();
+	posInx = 0;
 }
 
