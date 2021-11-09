@@ -56,6 +56,7 @@ void ATimeWarpProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor
 			// try and play the sound if specified
 			if (HitSound != NULL)
 			{
+				// TODO: replicate sound to client.
 				UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 			}
 		}
