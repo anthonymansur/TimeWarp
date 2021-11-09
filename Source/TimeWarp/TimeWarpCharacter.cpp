@@ -16,6 +16,8 @@
 #include "TimeWarpGameState.h"
 #include "TimeWarpGameMode.h"
 
+#define RECORD_FREQUENCY 0.002 // NOTE: this is also defined in TimeWarpGameMode
+
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
 //////////////////////////////////////////////////////////////////////////
@@ -509,8 +511,8 @@ void ATimeWarpCharacter::DrawSinglePath(int i)
 void ATimeWarpCharacter::DrawPaths()
 {
 	static ATimeWarpGameMode* gameMode = static_cast<ATimeWarpGameMode*>(GetWorld()->GetAuthGameMode());
-	static const float drawInterval = 0.002; // interval, in seconds, to draw line 
-	static const float drawLength = 0.5; // draw the path one second ahead 
+	static const float drawInterval = RECORD_FREQUENCY; // interval, in seconds, to draw line 
+	static const float drawLength = 1; // draw the path one second ahead 
 	static const int numOfLinesToDraw = 2 * (int)(drawLength / drawInterval);
 
 	if (Lines.Num() == 0)
@@ -541,7 +543,7 @@ void ATimeWarpCharacter::SendPositionArray_Implementation(bool player1)
 void ATimeWarpCharacter::StartDrawPathCommand_Implementation()
 {
 	ATimeWarpGameMode* gameMode = static_cast<ATimeWarpGameMode*>(GetWorld()->GetAuthGameMode());
-	const float drawInterval = 0.002; // interval, in seconds, to draw line 
+	const float drawInterval = RECORD_FREQUENCY; // interval, in seconds, to draw line 
 	GetWorldTimerManager().SetTimer(handle_drawPath, this, &ATimeWarpCharacter::DrawPaths, drawInterval, true, 0.f);
 
 }
@@ -549,7 +551,4 @@ void ATimeWarpCharacter::EndDrawpathCommand_Implementation()
 {
 	GetWorldTimerManager().ClearTimer(handle_drawPath);
 }
-
-// TODO: CHANGE DRAW INTERVAL TO GET FROM GAME STATE
-// TODO: REVERT BACK TO PREVIOUS APPROACH OF LINE SPAWNING 
 

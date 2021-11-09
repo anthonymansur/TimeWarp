@@ -31,8 +31,6 @@ public:
 	virtual void HandleMatchHasStarted() override;
 	void EndElimination();
 
-	float getRecordFrequency();
-
 protected:
 	AActor* playerStart1;
 	AActor* playerStart2;
@@ -71,9 +69,6 @@ protected:
 
 	void StorePlayerPositions();
 	void TranslatePlayerPositions();
-
-	void DrawPaths();
-	void DrawSinglePath(int i);
 };
 
 
