@@ -49,7 +49,7 @@ protected:
 
 	TArray<FVector>* p1PositionOverTime;
 	TArray<FVector>* p2PositionOverTime;
-	int positionIndex;
+	TArray<int> positionIndices;
 	int positionArraySize;
 
 	TSubclassOf<AActor> PathLineClass;

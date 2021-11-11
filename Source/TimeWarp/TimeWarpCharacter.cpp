@@ -28,7 +28,7 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
-		
+
 
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
@@ -118,11 +118,8 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 	static ConstructorHelpers::FClassFinder<AActor> LineClassFinder(TEXT("/Game/Line"));
 	PathLineClass = LineClassFinder.Class;
 
-	// set positionIndex
-	PositionIndex = 0;
-
-	// initialize IsTimeTraveling
-	IsTimeTraveling = false;
+	// set TimeTravelSpeed
+	TimeTravelSpeed = 0;
 }
 
 void ATimeWarpCharacter::BeginPlay()
@@ -180,8 +177,10 @@ void ATimeWarpCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ATimeWarpCharacter::LookUpAtRate);
 
 	// Bind controls for moving foreward and backward in time
-	PlayerInputComponent->BindAxis("TimeForward", this, &ATimeWarpCharacter::TimeForward);
-	PlayerInputComponent->BindAxis("TimeBackward", this, &ATimeWarpCharacter::TimeBackward);
+	PlayerInputComponent->BindAction("TimeForward", IE_Pressed, this, &ATimeWarpCharacter::OnBeginTimeForward);
+	PlayerInputComponent->BindAction("TimeForward", IE_Released, this, &ATimeWarpCharacter::OnEndTimeForward);
+	PlayerInputComponent->BindAction("TimeBackward", IE_Pressed, this, &ATimeWarpCharacter::OnBeginTimeBackward);
+	PlayerInputComponent->BindAction("TimeBackward", IE_Released, this, &ATimeWarpCharacter::OnEndTimeBackward);
 }
 
 void ATimeWarpCharacter::OnFire()
@@ -341,29 +340,39 @@ void ATimeWarpCharacter::LookUpAtRate(float Rate)
 	}
 }
 
-void ATimeWarpCharacter::TimeForward(float Val)
+void ATimeWarpCharacter::OnBeginTimeForward()
 {
-	// Note that Val is positive
-	if (bCanShoot && Val != 0.0f)
+	// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "OnBeginTimeForward()!");
+	if (bCanShoot && TimeTravelSpeed == 0)
 	{
-		SetIsTimeTraveling(true);
-		SetPositionIndex(PositionIndex + static_cast<int>(Val * 10.f));
+		SetTimeTravelSpeed(2);
 	}
-	else {
-		SetIsTimeTraveling(false);
+}
+void ATimeWarpCharacter::OnEndTimeForward()
+{
+	// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "OnEndTimeForward()!");
+	if (bCanShoot && TimeTravelSpeed != 0)
+	{
+		SetTimeTravelSpeed(0);
 	}
 }
 
-void ATimeWarpCharacter::TimeBackward(float Val)
+void ATimeWarpCharacter::OnBeginTimeBackward()
 {
 	// Note that Val is negative
-	if (bCanShoot && Val != 0.0f)
+	if (bCanShoot && TimeTravelSpeed == 0)
 	{
-		SetIsTimeTraveling(true);
-		SetPositionIndex(PositionIndex + static_cast<int>(Val * 10.f));
+		// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "OnBeginTimeBackward()!");
+		SetTimeTravelSpeed(-2);
 	}
-	else {
-		SetIsTimeTraveling(false);
+}
+void ATimeWarpCharacter::OnEndTimeBackward()
+{
+	// Note that Val is negative
+	if (bCanShoot && TimeTravelSpeed != 0)
+	{
+		// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "OnEndTimeBackward()!");
+		SetTimeTravelSpeed(0);
 	}
 }
 
@@ -378,7 +387,7 @@ bool ATimeWarpCharacter::EnableTouchscreenMovement(class UInputComponent* Player
 		//PlayerInputComponent->BindTouch(EInputEvent::IE_Repeat, this, &ATimeWarpCharacter::TouchUpdate);
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -435,22 +444,14 @@ void ATimeWarpCharacter::SetCurrentAmmo(int ammoValue)
 }
 
 
-void ATimeWarpCharacter::SetPositionIndex_Implementation(int posValue)
+void ATimeWarpCharacter::SetTimeTravelSpeed_Implementation(int Value)
 {
 	if (GetLocalRole() == ROLE_Authority)
 	{
-		PositionIndex = posValue;
+		TimeTravelSpeed = Value;
 	}
 }
 
-
-void ATimeWarpCharacter::SetIsTimeTraveling_Implementation(bool boolValue)
-{
-	if (GetLocalRole() == ROLE_Authority)
-	{
-		IsTimeTraveling = boolValue;
-	}
-}
 
 float ATimeWarpCharacter::TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
@@ -510,8 +511,7 @@ void ATimeWarpCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& 
 	DOREPLIFETIME(ATimeWarpCharacter, bTranslationEnabled);
 	DOREPLIFETIME(ATimeWarpCharacter, bCanShoot);
 	DOREPLIFETIME(ATimeWarpCharacter, timeRemaining);
-	DOREPLIFETIME(ATimeWarpCharacter, PositionIndex);
-	DOREPLIFETIME(ATimeWarpCharacter, IsTimeTraveling);
+	DOREPLIFETIME(ATimeWarpCharacter, TimeTravelSpeed);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -596,7 +596,7 @@ void ATimeWarpCharacter::DrawPaths()
 void ATimeWarpCharacter::SendPositionArray_Implementation(bool player1)
 {
 	if (player1)
-		PositionBuffer = static_cast<ATimeWarpGameState*>(GetWorld()->GetGameState())->getP1Position(); 
+		PositionBuffer = static_cast<ATimeWarpGameState*>(GetWorld()->GetGameState())->getP1Position();
 	else
 		PositionBuffer = static_cast<ATimeWarpGameState*>(GetWorld()->GetGameState())->getP2Position();
 }
