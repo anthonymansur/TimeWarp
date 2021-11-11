@@ -347,6 +347,7 @@ void ATimeWarpGameMode::ResetRound()
 		pawn->SetCurrentAmmo(10);
 		pawn->SetCurrentHealth(100);
 		pawn->SetTimeRemaining(0);
+		pawn->SetPositionIndex(0);
 		i++;
 	}
 

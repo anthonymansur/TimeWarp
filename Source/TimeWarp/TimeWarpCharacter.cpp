@@ -344,9 +344,8 @@ void ATimeWarpCharacter::LookUpAtRate(float Rate)
 void ATimeWarpCharacter::TimeForward(float Val)
 {
 	// Note that Val is positive
-	if (Val != 0.0f)
+	if (bCanShoot && Val != 0.0f)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, "Q (TimeForward) Pressed!");
 		SetIsTimeTraveling(true);
 		SetPositionIndex(PositionIndex + static_cast<int>(Val * 10.f));
 	}
@@ -358,9 +357,8 @@ void ATimeWarpCharacter::TimeForward(float Val)
 void ATimeWarpCharacter::TimeBackward(float Val)
 {
 	// Note that Val is negative
-	if (Val != 0.0f)
+	if (bCanShoot && Val != 0.0f)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, "E (TimeBackward) Pressed!");
 		SetIsTimeTraveling(true);
 		SetPositionIndex(PositionIndex + static_cast<int>(Val * 10.f));
 	}
@@ -607,12 +605,12 @@ void ATimeWarpCharacter::StartDrawPathCommand_Implementation()
 {
 	ATimeWarpGameMode* gameMode = static_cast<ATimeWarpGameMode*>(GetWorld()->GetAuthGameMode());
 	const float drawInterval = RECORD_FREQUENCY; // interval, in seconds, to draw line 
-	GetWorldTimerManager().SetTimer(handle_drawPath, this, &ATimeWarpCharacter::DrawPaths, drawInterval, true, 0.f);
+	//GetWorldTimerManager().SetTimer(handle_drawPath, this, &ATimeWarpCharacter::DrawPaths, drawInterval, true, 0.f);
 
 }
 void ATimeWarpCharacter::EndDrawPathCommand_Implementation()
 {
-	GetWorldTimerManager().ClearTimer(handle_drawPath);
+	//GetWorldTimerManager().ClearTimer(handle_drawPath);
 	int size = Lines.Num();
 	for (int i = 0; i < size; i++)
 		Lines.Pop()->Destroy();
