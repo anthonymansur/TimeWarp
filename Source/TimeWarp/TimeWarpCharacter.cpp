@@ -117,6 +117,9 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 	// path highlight
 	static ConstructorHelpers::FClassFinder<AActor> LineClassFinder(TEXT("/Game/Line"));
 	PathLineClass = LineClassFinder.Class;
+
+	// set positionIndex
+	PositionIndex = 0;
 }
 
 void ATimeWarpCharacter::BeginPlay()
@@ -172,6 +175,10 @@ void ATimeWarpCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAxis("TurnRate", this, &ATimeWarpCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &ATimeWarpCharacter::LookUp);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ATimeWarpCharacter::LookUpAtRate);
+
+	// Bind controls for moving foreward and backward in time
+	PlayerInputComponent->BindAxis("TimeForward", this, &ATimeWarpCharacter::TimeForward);
+	PlayerInputComponent->BindAxis("TimeBackward", this, &ATimeWarpCharacter::TimeBackward);
 }
 
 void ATimeWarpCharacter::OnFire()
@@ -331,6 +338,26 @@ void ATimeWarpCharacter::LookUpAtRate(float Rate)
 	}
 }
 
+void ATimeWarpCharacter::TimeForward(float Val)
+{
+	// Note that Val is positive
+	if (Val != 0.0f)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, "Q (TimeForward) Pressed!");
+		PositionIndex += static_cast<int>(Val * 10.f);
+	}
+}
+
+void ATimeWarpCharacter::TimeBackward(float Val)
+{
+	// Note that Val is negative
+	if (Val != 0.0f)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, "E (TimeBackward) Pressed!");
+		PositionIndex += static_cast<int>(Val * 10.f);
+	}
+}
+
 bool ATimeWarpCharacter::EnableTouchscreenMovement(class UInputComponent* PlayerInputComponent)
 {
 	if (FPlatformMisc::SupportsTouchInput() || GetDefault<UInputSettings>()->bUseMouseForTouch)
@@ -399,6 +426,18 @@ void ATimeWarpCharacter::SetCurrentAmmo(int ammoValue)
 }
 
 
+void ATimeWarpCharacter::SetPositionIndex_Implementation(int posValue)
+{
+	/*
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		PositionIndex = posValue;
+	}
+	*/
+	PositionIndex = posValue;
+}
+
+
 float ATimeWarpCharacter::TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (CurrentHealth > 0.01f)
@@ -457,6 +496,7 @@ void ATimeWarpCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& 
 	DOREPLIFETIME(ATimeWarpCharacter, bTranslationEnabled);
 	DOREPLIFETIME(ATimeWarpCharacter, bCanShoot);
 	DOREPLIFETIME(ATimeWarpCharacter, timeRemaining);
+	DOREPLIFETIME(ATimeWarpCharacter, PositionIndex);
 }
 
 //////////////////////////////////////////////////////////////////////////
