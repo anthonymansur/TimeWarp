@@ -131,6 +131,12 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
+	/** Handles moving forward in time */
+	void TimeForward(float Val);
+
+	/** Handles moving backward in time */
+	void TimeBackward(float Val);
+
 	struct TouchData
 	{
 		TouchData() { bIsPressed = false;Location=FVector::ZeroVector;}
@@ -176,6 +182,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, replicated)
 	int timeRemaining;
 
+	/** The time remaining*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, replicated)
+	int PositionIndex;
+
+	/** Whether the player is currently time-traveling*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, replicated)
+	bool IsTimeTraveling;
+
 	/** RepNotify for changes made to current health. */
 	UFUNCTION()
 	void OnRep_CurrentHealth();
@@ -220,6 +234,20 @@ public:
 	/** Setter for CurrentAmmo. */
 	UFUNCTION(BlueprintCallable, Category = "Ammo")
 	void SetCurrentAmmo(int ammoValue);
+
+	/** Getter for PositionIndex.*/
+	UFUNCTION(BlueprintPure, Category = "Ammo")
+	FORCEINLINE int GetPositionIndex() const { return PositionIndex; }
+
+	UFUNCTION(Server, Reliable)
+	void SetPositionIndex(int posValue);
+
+	/** Getter for PositionIndex.*/
+	UFUNCTION(BlueprintPure, Category = "Ammo")
+	FORCEINLINE bool GetIsTimeTraveling() const { return IsTimeTraveling; }
+
+	UFUNCTION(Server, Reliable)
+	void SetIsTimeTraveling(bool boolValue);
 
 
 	/** Event for taking damage. Overridden from APawn.*/
