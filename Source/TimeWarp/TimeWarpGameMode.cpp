@@ -15,7 +15,7 @@
 
 #define RECORD_FREQUENCY 0.002 // NOTE: this is also defined in TimeWarpCharacter
 #define PREGAME_LENGTH 3.0
-#define GAME_LENGTH 30.0
+#define GAME_LENGTH 30.0 // original is 30.0
 
 #define RANDOM_SEED 123456
 #define NUM_AMMUNITIONS 20
@@ -347,6 +347,7 @@ void ATimeWarpGameMode::ResetRound()
 		pawn->SetCurrentAmmo(10);
 		pawn->SetCurrentHealth(100);
 		pawn->SetTimeRemaining(0);
+		pawn->SetPositionIndex(0);
 		i++;
 	}
 
@@ -366,6 +367,7 @@ void ATimeWarpGameMode::StorePlayerPositions()
 	p1PositionOverTime->Emplace(p1Pos);
 	p2PositionOverTime->Emplace(p2Pos);
 }
+/*
 void ATimeWarpGameMode::TranslatePlayerPositions()
 {
 	if (positionIndex < positionArraySize)
@@ -377,4 +379,27 @@ void ATimeWarpGameMode::TranslatePlayerPositions()
 	//DrawPaths();
 	
 	positionIndex++;
+}
+*/
+void ATimeWarpGameMode::TranslatePlayerPositions()
+{
+	
+	for (int i = 0; i < GameState->PlayerArray.Num(); i++)
+	{
+		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(GameState->PlayerArray[i]->GetPawn());
+		int currentPositionIndex = std::min(std::max(pawn->GetPositionIndex(), 0), positionArraySize - 1);
+
+		if (i == 0)
+		{
+			UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->SetActorLocation((*p1PositionOverTime)[currentPositionIndex]);
+		}
+		else {
+			UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->SetActorLocation((*p2PositionOverTime)[currentPositionIndex]);
+		}
+
+		if (!pawn->GetIsTimeTraveling())
+		{
+			pawn->SetPositionIndex(currentPositionIndex + 1);
+		}
+	}
 }
