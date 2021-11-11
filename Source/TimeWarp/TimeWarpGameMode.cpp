@@ -396,6 +396,9 @@ void ATimeWarpGameMode::TranslatePlayerPositions()
 			UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->SetActorLocation((*p2PositionOverTime)[currentPositionIndex]);
 		}
 
-		pawn->SetPositionIndex(currentPositionIndex + 1);
+		if (!pawn->GetIsTimeTraveling())
+		{
+			pawn->SetPositionIndex(currentPositionIndex + 1);
+		}
 	}
 }

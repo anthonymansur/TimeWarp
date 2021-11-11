@@ -186,6 +186,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, replicated)
 	int PositionIndex;
 
+	/** Whether the player is currently time-traveling*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, replicated)
+	bool IsTimeTraveling;
+
 	/** RepNotify for changes made to current health. */
 	UFUNCTION()
 	void OnRep_CurrentHealth();
@@ -235,10 +239,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Ammo")
 	FORCEINLINE int GetPositionIndex() const { return PositionIndex; }
 
-	/** Setter for CurrentAmmo. */
-
 	UFUNCTION(Server, Reliable)
 	void SetPositionIndex(int posValue);
+
+	/** Getter for PositionIndex.*/
+	UFUNCTION(BlueprintPure, Category = "Ammo")
+	FORCEINLINE bool GetIsTimeTraveling() const { return IsTimeTraveling; }
+
+	UFUNCTION(Server, Reliable)
+	void SetIsTimeTraveling(bool boolValue);
 
 
 	/** Event for taking damage. Overridden from APawn.*/

@@ -120,6 +120,9 @@ ATimeWarpCharacter::ATimeWarpCharacter()
 
 	// set positionIndex
 	PositionIndex = 0;
+
+	// initialize IsTimeTraveling
+	IsTimeTraveling = false;
 }
 
 void ATimeWarpCharacter::BeginPlay()
@@ -344,7 +347,11 @@ void ATimeWarpCharacter::TimeForward(float Val)
 	if (Val != 0.0f)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, "Q (TimeForward) Pressed!");
-		PositionIndex += static_cast<int>(Val * 10.f);
+		SetIsTimeTraveling(true);
+		SetPositionIndex(PositionIndex + static_cast<int>(Val * 10.f));
+	}
+	else {
+		SetIsTimeTraveling(false);
 	}
 }
 
@@ -354,7 +361,11 @@ void ATimeWarpCharacter::TimeBackward(float Val)
 	if (Val != 0.0f)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Magenta, "E (TimeBackward) Pressed!");
-		PositionIndex += static_cast<int>(Val * 10.f);
+		SetIsTimeTraveling(true);
+		SetPositionIndex(PositionIndex + static_cast<int>(Val * 10.f));
+	}
+	else {
+		SetIsTimeTraveling(false);
 	}
 }
 
@@ -428,15 +439,20 @@ void ATimeWarpCharacter::SetCurrentAmmo(int ammoValue)
 
 void ATimeWarpCharacter::SetPositionIndex_Implementation(int posValue)
 {
-	/*
 	if (GetLocalRole() == ROLE_Authority)
 	{
 		PositionIndex = posValue;
 	}
-	*/
-	PositionIndex = posValue;
 }
 
+
+void ATimeWarpCharacter::SetIsTimeTraveling_Implementation(bool boolValue)
+{
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		IsTimeTraveling = boolValue;
+	}
+}
 
 float ATimeWarpCharacter::TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
@@ -497,6 +513,7 @@ void ATimeWarpCharacter::GetLifetimeReplicatedProps(TArray <FLifetimeProperty>& 
 	DOREPLIFETIME(ATimeWarpCharacter, bCanShoot);
 	DOREPLIFETIME(ATimeWarpCharacter, timeRemaining);
 	DOREPLIFETIME(ATimeWarpCharacter, PositionIndex);
+	DOREPLIFETIME(ATimeWarpCharacter, IsTimeTraveling);
 }
 
 //////////////////////////////////////////////////////////////////////////
