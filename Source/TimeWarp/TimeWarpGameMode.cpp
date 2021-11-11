@@ -12,10 +12,11 @@
 #include "UObject/ConstructorHelpers.h"
 
 #include <algorithm>
+#include <string>
 
 #define RECORD_FREQUENCY 0.002 // NOTE: this is also defined in TimeWarpCharacter
 #define PREGAME_LENGTH 3.0
-#define GAME_LENGTH 30.0 // original is 30.0
+#define GAME_LENGTH 10.0 // original is 30.0
 
 #define RANDOM_SEED 123456
 #define NUM_AMMUNITIONS 20
@@ -53,8 +54,8 @@ ATimeWarpGameMode::ATimeWarpGameMode()
 
 	}
 
-	positionIndex = 0;
-	
+	positionIndices.Init(0, actors.Num());
+
 	// Initialize the random number generator
 	generator = std::default_random_engine(RANDOM_SEED);
 	static ConstructorHelpers::FClassFinder<AActor> AmmunitionBPClassFinder(TEXT("/Game/AmmunitionBP"));
@@ -347,13 +348,15 @@ void ATimeWarpGameMode::ResetRound()
 		pawn->SetCurrentAmmo(10);
 		pawn->SetCurrentHealth(100);
 		pawn->SetTimeRemaining(0);
-		pawn->SetPositionIndex(0);
+
+		// reset the position index of both players back to 0
+		positionIndices[i] = 0;
+
 		i++;
 	}
 
 	p1PositionOverTime->Empty();
 	p2PositionOverTime->Empty();
-	positionIndex = 0;
 	positionArraySize = 0;
 
 	HandleMatchHasStarted();
@@ -383,23 +386,27 @@ void ATimeWarpGameMode::TranslatePlayerPositions()
 */
 void ATimeWarpGameMode::TranslatePlayerPositions()
 {
-	
 	for (int i = 0; i < GameState->PlayerArray.Num(); i++)
 	{
-		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(GameState->PlayerArray[i]->GetPawn());
-		int currentPositionIndex = std::min(std::max(pawn->GetPositionIndex(), 0), positionArraySize - 1);
-
 		if (i == 0)
 		{
-			UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->SetActorLocation((*p1PositionOverTime)[currentPositionIndex]);
+			UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->SetActorLocation((*p1PositionOverTime)[positionIndices[0]]);
 		}
-		else {
-			UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->SetActorLocation((*p2PositionOverTime)[currentPositionIndex]);
+		else
+		{
+			UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->SetActorLocation((*p2PositionOverTime)[positionIndices[1]]);
 		}
 
-		if (!pawn->GetIsTimeTraveling())
+		// update both players' position indices
+		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(GameState->PlayerArray[i]->GetPawn());
+		int speed = pawn->GetTimeTravelSpeed();
+		if (speed != 0)
 		{
-			pawn->SetPositionIndex(currentPositionIndex + 1);
+			positionIndices[i] = std::min(std::max(positionIndices[i] + speed, 0), positionArraySize - 1);
+		}
+		else
+		{
+			positionIndices[i] = std::min(std::max(positionIndices[i] + 1, 0), positionArraySize - 1);
 		}
 	}
 }
