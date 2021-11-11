@@ -16,7 +16,7 @@
 
 #define RECORD_FREQUENCY 0.002 // NOTE: this is also defined in TimeWarpCharacter
 #define PREGAME_LENGTH 3.0
-#define GAME_LENGTH 10.0 // original is 30.0
+#define GAME_LENGTH 30.0 // original is 30.0
 
 #define RANDOM_SEED 123456
 #define NUM_AMMUNITIONS 20
