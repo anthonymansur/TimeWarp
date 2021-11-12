@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <string>
 
-#define RECORD_FREQUENCY 0.002 // NOTE: this is also defined in TimeWarpCharacter
+#define RECORD_FREQUENCY 0.01 // NOTE: this is also defined in TimeWarpCharacter
 #define PREGAME_LENGTH 3.0
 #define GAME_LENGTH 30.0 // original is 30.0
 
@@ -400,13 +400,8 @@ void ATimeWarpGameMode::TranslatePlayerPositions()
 		// update both players' position indices
 		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(GameState->PlayerArray[i]->GetPawn());
 		int speed = pawn->GetTimeTravelSpeed();
-		if (speed != 0)
 		{
 			positionIndices[i] = std::min(std::max(positionIndices[i] + speed, 0), positionArraySize - 1);
-		}
-		else
-		{
-			positionIndices[i] = std::min(std::max(positionIndices[i] + 1, 0), positionArraySize - 1);
 		}
 	}
 }
