@@ -16,7 +16,7 @@
 #include "TimeWarpGameState.h"
 #include "TimeWarpGameMode.h"
 
-#define RECORD_FREQUENCY 0.002 // NOTE: this is also defined in TimeWarpGameMode
+#define RECORD_FREQUENCY 0.01 // NOTE: this is also defined in TimeWarpGameMode
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -345,7 +345,7 @@ void ATimeWarpCharacter::OnBeginTimeForward()
 	// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "OnBeginTimeForward()!");
 	if (bCanShoot && TimeTravelSpeed == 0)
 	{
-		SetTimeTravelSpeed(2);
+		SetTimeTravelSpeed(1);
 	}
 }
 void ATimeWarpCharacter::OnEndTimeForward()
@@ -363,7 +363,7 @@ void ATimeWarpCharacter::OnBeginTimeBackward()
 	if (bCanShoot && TimeTravelSpeed == 0)
 	{
 		// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "OnBeginTimeBackward()!");
-		SetTimeTravelSpeed(-2);
+		SetTimeTravelSpeed(-1);
 	}
 }
 void ATimeWarpCharacter::OnEndTimeBackward()
