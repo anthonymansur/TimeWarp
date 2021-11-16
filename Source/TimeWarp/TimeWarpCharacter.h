@@ -95,6 +95,7 @@ public:
 	//UPROPERTY(replicated)
 	TArray<FVector>* PositionBuffer;
 	int posInx;
+	int lastPos;
 
 	TSubclassOf<AActor> PathLineClass;
 	TArray<AActor*> Lines;
@@ -190,11 +191,11 @@ protected:
 
 	/** RepNotify for changes made to current health. */
 	UFUNCTION()
-		void OnRep_CurrentHealth();
+	void OnRep_CurrentHealth();
 
 	/** Server function for spawning projectiles. */
 	UFUNCTION(Server, Reliable)
-		void HandleFire();
+	void HandleFire();
 
 	UPROPERTY(Replicated)
 		bool bTranslationEnabled;
@@ -214,36 +215,36 @@ public:
 
 	/** Getter for Max Health.*/
 	UFUNCTION(BlueprintPure, Category = "Health")
-		FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 
 	/** Getter for Current Health.*/
 	UFUNCTION(BlueprintPure, Category = "Health")
-		FORCEINLINE float GetCurrentHealth() const { return CurrentHealth; }
+	FORCEINLINE float GetCurrentHealth() const { return CurrentHealth; }
 
 	/** Setter for Current Health. Clamps the value between 0 and MaxHealth and calls OnHealthUpdate. Should only be called on the server.*/
 	UFUNCTION(BlueprintCallable, Category = "Health")
-		void SetCurrentHealth(float healthValue);
+	void SetCurrentHealth(float healthValue);
 
 
 	/** Getter for CurrentAmmo.*/
 	UFUNCTION(BlueprintPure, Category = "Ammo")
-		FORCEINLINE int GetCurrentAmmo() const { return CurrentAmmo; }
+	FORCEINLINE int GetCurrentAmmo() const { return CurrentAmmo; }
 
 	/** Setter for CurrentAmmo. */
 	UFUNCTION(BlueprintCallable, Category = "Ammo")
-		void SetCurrentAmmo(int ammoValue);
+	void SetCurrentAmmo(int ammoValue);
 
 	/** Getter for PositionIndex.*/
 	UFUNCTION(BlueprintPure, Category = "Ammo")
-		FORCEINLINE int GetTimeTravelSpeed() const { return TimeTravelSpeed; }
+	FORCEINLINE int GetTimeTravelSpeed() const { return TimeTravelSpeed; }
 
 	UFUNCTION(Server, Reliable)
-		void SetTimeTravelSpeed(int Value);
+	void SetTimeTravelSpeed(int Value);
 
 
 	/** Event for taking damage. Overridden from APawn.*/
 	UFUNCTION(BlueprintCallable, Category = "Health")
-		float TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	float TakeDamage(float DamageTaken, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	bool IsDead();
 
@@ -256,18 +257,20 @@ public:
 	void DisableShooting();
 
 	UFUNCTION(Client, Reliable)
-		void SendPositionArray(bool player1); // TODO: change name 
+	void SendPositionArray(bool player1); // TODO: change name 
 
-	void DrawPaths();
-	void DrawSinglePath(int i);
-
-	UFUNCTION(Client, Reliable)
-		void StartDrawPathCommand();
-	UFUNCTION(Client, Reliable)
-		void EndDrawPathCommand();
+	void DrawSinglePath(int i, bool addToFront = false);
 
 	UFUNCTION(Client, Reliable)
-		void SetTimeRemaining(int time);
+	void StartDrawPathCommand();
+	UFUNCTION(Client, Reliable)
+	void EndDrawPathCommand();
+
+	UFUNCTION(Client, Reliable)
+	void SetTimeRemaining(int time);
+
+	//UFUNCTION(Client, Reliable)
+	void UpdatePosition();
 
 	void UpdateTime();
 };

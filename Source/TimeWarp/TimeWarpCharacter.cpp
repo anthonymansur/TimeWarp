@@ -18,6 +18,9 @@
 
 #define RECORD_FREQUENCY 0.01 // NOTE: this is also defined in TimeWarpGameMode
 
+#define NUM_OF_PATHS 30
+#define PATH_LENGTH 10
+
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
 //////////////////////////////////////////////////////////////////////////
@@ -553,44 +556,17 @@ void ATimeWarpCharacter::HandleFire_Implementation()
 }
 
 // helper function
-void ATimeWarpCharacter::DrawSinglePath(int i)
+void ATimeWarpCharacter::DrawSinglePath(int i, bool addToFront)
 {
-	if ((i + 10) >= PositionBuffer->Num())
+	if (i >= PositionBuffer->Num())
 		return;
-	FVector posDiff = FVector((*PositionBuffer)[i + 10]) - FVector((*PositionBuffer)[i]);
-	posDiff[2] = 0;
-	float angle = FMath::Acos(FVector::DotProduct(FVector(1, 0, 0), posDiff.GetSafeNormal()));
-	FTransform transform = FTransform();
-	transform.SetLocation(FVector((*PositionBuffer)[i].X, (*PositionBuffer)[i].Y, 171));
-	transform.SetRotation(FQuat(0, 0, 1, angle));
-
 	FActorSpawnParameters ActorSpawnParams;
-	Lines.Add(GetWorld()->SpawnActor<AActor>(PathLineClass, transform, ActorSpawnParams));
-	Lines.Last()->SetActorScale3D(FVector(0.1, 2, 1));
-}
-
-void ATimeWarpCharacter::DrawPaths()
-{
-	static ATimeWarpGameMode* gameMode = static_cast<ATimeWarpGameMode*>(GetWorld()->GetAuthGameMode());
-	static const float drawInterval = RECORD_FREQUENCY; // interval, in seconds, to draw line 
-	static const float drawLength = 1; // draw the path one second ahead 
-	static const int numOfLinesToDraw = 2 * (int)(drawLength / drawInterval);
-
-	if (Lines.Num() == 0)
-	{
-		for (int i = 0; i < numOfLinesToDraw; i++)
-		{
-			DrawSinglePath(i);
-		}
-	}
+	FVector posDiff = FVector((*PositionBuffer)[i]);
+	posDiff.Z -= 80;
+	if (addToFront)
+		Lines.Insert(GetWorld()->SpawnActor<AActor>(PathLineClass, posDiff, FRotator(), ActorSpawnParams), 0);
 	else
-	{
-		Lines[0]->Destroy();
-		Lines.RemoveAt(0);
-		if ((posInx + numOfLinesToDraw) < (PositionBuffer->Num() - 1))
-			DrawSinglePath(posInx + numOfLinesToDraw);
-	}
-	posInx++;
+		Lines.Add(GetWorld()->SpawnActor<AActor>(PathLineClass, posDiff, FRotator(), ActorSpawnParams));
 }
 
 void ATimeWarpCharacter::SendPositionArray_Implementation(bool player1)
@@ -604,17 +580,23 @@ void ATimeWarpCharacter::SendPositionArray_Implementation(bool player1)
 void ATimeWarpCharacter::StartDrawPathCommand_Implementation()
 {
 	ATimeWarpGameMode* gameMode = static_cast<ATimeWarpGameMode*>(GetWorld()->GetAuthGameMode());
-	const float drawInterval = RECORD_FREQUENCY; // interval, in seconds, to draw line 
-	//GetWorldTimerManager().SetTimer(handle_drawPath, this, &ATimeWarpCharacter::DrawPaths, drawInterval, true, 0.f);
-
+	for (int i = 0; i < NUM_OF_PATHS / 2; i++)
+	{
+		DrawSinglePath(i * PATH_LENGTH);
+	}
+	GetWorldTimerManager().SetTimer(handle_drawPath, this, &ATimeWarpCharacter::UpdatePosition, RECORD_FREQUENCY, true, 0.f);
 }
 void ATimeWarpCharacter::EndDrawPathCommand_Implementation()
 {
-	//GetWorldTimerManager().ClearTimer(handle_drawPath);
+	GetWorldTimerManager().ClearTimer(handle_drawPath);
 	int size = Lines.Num();
 	for (int i = 0; i < size; i++)
-		Lines.Pop()->Destroy();
+	{
+		Lines[Lines.Num() - 1]->Destroy();
+		Lines.RemoveAt(Lines.Num() - 1);
+	}
 	posInx = 0;
+	lastPos = 0;
 }
 
 void ATimeWarpCharacter::SetTimeRemaining_Implementation(int time)
@@ -634,3 +616,30 @@ void ATimeWarpCharacter::UpdateTime()
 		GetWorldTimerManager().ClearTimer(handle_timeRemaining);
 }
 
+void ATimeWarpCharacter::UpdatePosition()
+{
+	if (TimeTravelSpeed != 0)
+		posInx += TimeTravelSpeed;
+
+	if (TimeTravelSpeed > 0 && (posInx + NUM_OF_PATHS * PATH_LENGTH / 2) < PositionBuffer->Num() && abs(posInx - lastPos) >= PATH_LENGTH)
+	{
+		// TODO: implement
+		if (Lines.Num() >= NUM_OF_PATHS)
+		{
+			Lines[0]->Destroy();
+			Lines.RemoveAt(0);
+		}
+		DrawSinglePath(posInx + NUM_OF_PATHS * PATH_LENGTH / 2);
+		lastPos = posInx;
+	}
+	else if (TimeTravelSpeed < 0 && (posInx - NUM_OF_PATHS * PATH_LENGTH / 2) >= 0 && abs(posInx - lastPos) >= PATH_LENGTH)
+	{
+		if (Lines.Num() >= NUM_OF_PATHS)
+		{
+			Lines[Lines.Num() - 1]->Destroy();
+			Lines.RemoveAt(Lines.Num() - 1);
+		}
+		DrawSinglePath(posInx - NUM_OF_PATHS * PATH_LENGTH / 2, true);
+		lastPos = posInx;
+	}
+}
