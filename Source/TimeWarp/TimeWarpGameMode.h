@@ -56,7 +56,6 @@ protected:
 	TArray<AActor*> Lines;
 	
 	// For random number generation
-	std::default_random_engine generator;
 	TArray<FVector> ammunitionPositions;
 	TArray<AActor*> ammunitions;
 	TSubclassOf<AActor> ammunitionBPClass;
@@ -73,6 +72,3 @@ protected:
 	void StorePlayerPositions();
 	void TranslatePlayerPositions();
 };
-
-
-

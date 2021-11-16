@@ -16,7 +16,7 @@
 
 #define RECORD_FREQUENCY 0.01 // NOTE: this is also defined in TimeWarpCharacter
 #define PREGAME_LENGTH 3.0
-#define GAME_LENGTH 30.0 // original is 30.0
+#define GAME_LENGTH 10.0 // original is 30.0
 
 #define RANDOM_SEED 123456
 #define NUM_AMMUNITIONS 20
@@ -56,8 +56,7 @@ ATimeWarpGameMode::ATimeWarpGameMode()
 
 	positionIndices.Init(0, actors.Num());
 
-	// Initialize the random number generator
-	generator = std::default_random_engine(RANDOM_SEED);
+	// Initialize the ammunition to be spawned
 	static ConstructorHelpers::FClassFinder<AActor> AmmunitionBPClassFinder(TEXT("/Game/AmmunitionBP"));
 	ammunitionBPClass = AmmunitionBPClassFinder.Class;
 }
@@ -68,6 +67,8 @@ void ATimeWarpGameMode::PostLogin(APlayerController* NewPlayer)
 }
 
 void ATimeWarpGameMode::SpawnAmmunitions(int num_ammunitions) {
+	std::default_random_engine generator(static_cast<unsigned>(FDateTime::Now().GetMillisecond()));
+
 	const float mean = 0.0f;
 	const float stddev = .8f;
 
@@ -397,7 +398,6 @@ void ATimeWarpGameMode::TranslatePlayerPositions()
 		{
 			UGameplayStatics::GetPlayerPawn(GetWorld(), 1)->SetActorLocation((*p2PositionOverTime)[positionIndices[1]]);
 		}
-
 		// update both players' position indices
 		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(GameState->PlayerArray[i]->GetPawn());
 		int speed = pawn->GetTimeTravelSpeed();

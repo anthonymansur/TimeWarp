@@ -182,6 +182,7 @@ void ATimeWarpCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	// Bind controls for moving foreward and backward in time
 	PlayerInputComponent->BindAction("TimeForward", IE_Pressed, this, &ATimeWarpCharacter::OnBeginTimeForward);
 	PlayerInputComponent->BindAction("TimeForward", IE_Released, this, &ATimeWarpCharacter::OnEndTimeForward);
+
 	PlayerInputComponent->BindAction("TimeBackward", IE_Pressed, this, &ATimeWarpCharacter::OnBeginTimeBackward);
 	PlayerInputComponent->BindAction("TimeBackward", IE_Released, this, &ATimeWarpCharacter::OnEndTimeBackward);
 }
@@ -346,7 +347,7 @@ void ATimeWarpCharacter::LookUpAtRate(float Rate)
 void ATimeWarpCharacter::OnBeginTimeForward()
 {
 	// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "OnBeginTimeForward()!");
-	if (bCanShoot && TimeTravelSpeed == 0)
+	if (bCanShoot)
 	{
 		SetTimeTravelSpeed(1);
 	}
@@ -354,27 +355,37 @@ void ATimeWarpCharacter::OnBeginTimeForward()
 void ATimeWarpCharacter::OnEndTimeForward()
 {
 	// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "OnEndTimeForward()!");
-	if (bCanShoot && TimeTravelSpeed != 0)
+	if (bCanShoot)
 	{
+		if (TimeTravelSpeed < 0) {
+			// means we have already pressed the "Time Backward (Q)" key before releasing the
+			// "Time Forward (E)" key and therefore there's no need to set the time traveling
+			// speed back to 0.
+			return;
+		}
 		SetTimeTravelSpeed(0);
 	}
 }
 
 void ATimeWarpCharacter::OnBeginTimeBackward()
 {
-	// Note that Val is negative
-	if (bCanShoot && TimeTravelSpeed == 0)
+	// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "OnBeginTimeBackward()!");
+	if (bCanShoot)
 	{
-		// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Magenta, "OnBeginTimeBackward()!");
 		SetTimeTravelSpeed(-1);
 	}
 }
 void ATimeWarpCharacter::OnEndTimeBackward()
 {
-	// Note that Val is negative
-	if (bCanShoot && TimeTravelSpeed != 0)
+	// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "OnEndTimeBackward()!");
+	if (bCanShoot)
 	{
-		// GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, "OnEndTimeBackward()!");
+		if (TimeTravelSpeed > 0) {
+			// means we have already pressed the "Time Forward (E)" key before releasing the
+			// "Time Backward (Q)" key and therefore there's no need to set the time traveling
+			// speed back to 0.
+			return;
+		}
 		SetTimeTravelSpeed(0);
 	}
 }
