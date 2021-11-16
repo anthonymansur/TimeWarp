@@ -17,10 +17,7 @@
 #define RECORD_FREQUENCY 0.01 // NOTE: this is also defined in TimeWarpCharacter
 #define PREGAME_LENGTH 3.0
 #define GAME_LENGTH 30.0 // original is 30.0
-
-#define RANDOM_SEED 123456
 #define NUM_AMMUNITIONS 20
-
 #define FLOOR_HEIGHT 170.f
 
 ATimeWarpGameMode::ATimeWarpGameMode()
@@ -70,7 +67,7 @@ void ATimeWarpGameMode::SpawnAmmunitions(int num_ammunitions) {
 	std::default_random_engine generator(static_cast<unsigned>(FDateTime::Now().GetMillisecond()));
 
 	const float mean = 0.0f;
-	const float stddev = .8f;
+	const float stddev = .5f;
 
 	const FVector offset = FVector(-282.f, 0.f, 0.f);
 	const float scale = 850.0f;
