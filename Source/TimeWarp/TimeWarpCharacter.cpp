@@ -584,11 +584,10 @@ void ATimeWarpCharacter::StartDrawPathCommand_Implementation()
 	{
 		DrawSinglePath(i * PATH_LENGTH);
 	}
-	GetWorldTimerManager().SetTimer(handle_drawPath, this, &ATimeWarpCharacter::UpdatePosition, RECORD_FREQUENCY, true, 0.f);
 }
 void ATimeWarpCharacter::EndDrawPathCommand_Implementation()
 {
-	GetWorldTimerManager().ClearTimer(handle_drawPath);
+	//GetWorldTimerManager().ClearTimer(handle_drawPath);
 	int size = Lines.Num();
 	for (int i = 0; i < size; i++)
 	{
@@ -616,12 +615,11 @@ void ATimeWarpCharacter::UpdateTime()
 		GetWorldTimerManager().ClearTimer(handle_timeRemaining);
 }
 
-void ATimeWarpCharacter::UpdatePosition()
+void ATimeWarpCharacter::UpdatePosition_Implementation(int inc)
 {
-	if (TimeTravelSpeed != 0)
-		posInx += TimeTravelSpeed;
+	posInx += inc;
 
-	if (TimeTravelSpeed > 0 && (posInx + NUM_OF_PATHS * PATH_LENGTH / 2) < PositionBuffer->Num() && abs(posInx - lastPos) >= PATH_LENGTH)
+	if (inc > 0 && (posInx + NUM_OF_PATHS * PATH_LENGTH / 2) < PositionBuffer->Num() && abs(posInx - lastPos) >= PATH_LENGTH)
 	{
 		// TODO: implement
 		if (Lines.Num() >= NUM_OF_PATHS)
@@ -632,7 +630,7 @@ void ATimeWarpCharacter::UpdatePosition()
 		DrawSinglePath(posInx + NUM_OF_PATHS * PATH_LENGTH / 2);
 		lastPos = posInx;
 	}
-	else if (TimeTravelSpeed < 0 && (posInx - NUM_OF_PATHS * PATH_LENGTH / 2) >= 0 && abs(posInx - lastPos) >= PATH_LENGTH)
+	else if (inc < 0 && (posInx - NUM_OF_PATHS * PATH_LENGTH / 2) >= 0 && abs(posInx - lastPos) >= PATH_LENGTH)
 	{
 		if (Lines.Num() >= NUM_OF_PATHS)
 		{

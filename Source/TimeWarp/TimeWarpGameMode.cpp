@@ -16,7 +16,7 @@
 
 #define RECORD_FREQUENCY 0.01 // NOTE: this is also defined in TimeWarpCharacter
 #define PREGAME_LENGTH 3.0
-#define GAME_LENGTH 10.0 // original is 30.0
+#define GAME_LENGTH 30.0 // original is 30.0
 
 #define RANDOM_SEED 123456
 #define NUM_AMMUNITIONS 20
@@ -386,6 +386,7 @@ void ATimeWarpGameMode::TranslatePlayerPositions()
 */
 void ATimeWarpGameMode::TranslatePlayerPositions()
 {
+
 	for (int i = 0; i < GameState->PlayerArray.Num(); i++)
 	{
 		if (i == 0)
@@ -401,6 +402,6 @@ void ATimeWarpGameMode::TranslatePlayerPositions()
 		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(GameState->PlayerArray[i]->GetPawn());
 		int speed = pawn->GetTimeTravelSpeed();
 		positionIndices[i] = std::min(std::max(positionIndices[i] + speed, 0), positionArraySize - 1);
-		//pawn->UpdatePosition(speed * delay);
+		pawn->UpdatePosition(speed);
 	}
 }

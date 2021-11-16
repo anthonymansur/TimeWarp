@@ -269,8 +269,8 @@ public:
 	UFUNCTION(Client, Reliable)
 	void SetTimeRemaining(int time);
 
-	//UFUNCTION(Client, Reliable)
-	void UpdatePosition();
+	UFUNCTION(Client, Reliable)
+	void UpdatePosition(int inc);
 
 	void UpdateTime();
 };
