@@ -263,7 +263,7 @@ void ATimeWarpGameMode::StartEliminationStage()
 	for (int i = 0; i < 2; i++)
 	{
 		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(UGameplayStatics::GetPlayerPawn(GetWorld(), i));
-		pawn->StartDrawPathCommand();
+		//pawn->StartDrawPathCommand();
 		pawn->SetTimeRemaining(GAME_LENGTH);
 	}
 }
@@ -399,6 +399,6 @@ void ATimeWarpGameMode::TranslatePlayerPositions()
 		ATimeWarpCharacter* pawn = static_cast<ATimeWarpCharacter*>(GameState->PlayerArray[i]->GetPawn());
 		int speed = pawn->GetTimeTravelSpeed();
 		positionIndices[i] = std::min(std::max(positionIndices[i] + speed, 0), positionArraySize - 1);
-		pawn->UpdatePosition(speed);
+		//pawn->UpdatePosition(speed);
 	}
 }
