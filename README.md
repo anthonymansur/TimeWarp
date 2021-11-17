@@ -11,6 +11,9 @@ View the trailer here!: https://vimeo.com/ndevlin/timewarp
 - Created by Anthony Mansur, Nathan Devlin, and Jacky Lu
 - Created using Unreal Engine and C++
 
+- Download Playable Executables for Windows and Mac here: https://drive.google.com/drive/folders/1Y_LUi2Vk3K3yg2FnUTkZV6027-qWqW_P
+
+
 ## User Info
 
 - This is a two player game that allows you to play with a friend over the internet using Steam
@@ -35,6 +38,11 @@ View the trailer here!: https://vimeo.com/ndevlin/timewarp
 - Created in Unreal Engine using a combination of C++ and Blueprints
 - Utilized Visual Studio as our IDE
 - Works on both Windows and Mac
+
+- Assets:
+	- Utilized Animation Starter Pack from Epic Games Marketplace
+	- Utilized Infinity Blade: Hideout map from Epic Games Marketplace
+	- Utilized Sci Fi Warrior from Epic Games Marketplace
 
 
 - Opening the project files: 
